@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZOMBIE SURVIVAL FIXED</title>
+    <title>ZOMBIE SURVIVAL - РАБОЧИЙ МУЛЬТИПЛЕЕР</title>
     <style>
         * {
             margin: 0;
@@ -213,6 +213,82 @@
             background: rgba(255,170,0,0.3);
         }
 
+        #mp-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            padding: 30px;
+            border-radius: 30px;
+            border: 4px solid #ff44ff;
+            z-index: 200;
+            width: 350px;
+            display: none;
+            text-align: center;
+        }
+
+        #mp-menu h2 {
+            color: #ff44ff;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        #mp-menu input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 15px;
+            border: 3px solid #ff44ff;
+            background: #222;
+            color: white;
+            font-size: 18px;
+        }
+
+        #mp-menu button {
+            padding: 15px 30px;
+            background: #ff44ff;
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            border: 3px solid #ffff00;
+        }
+
+        #mp-menu button:active {
+            transform: scale(0.95);
+        }
+
+        #my-id {
+            color: #ff44ff;
+            font-size: 24px;
+            font-weight: bold;
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 15px;
+            margin: 10px 0;
+        }
+
+        #player-list {
+            margin: 20px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .player-entry {
+            padding: 8px;
+            margin: 5px 0;
+            background: #333;
+            border-radius: 10px;
+            color: #00ff00;
+        }
+
         #controls { 
             position: absolute; 
             bottom: 10px; 
@@ -265,6 +341,11 @@
             box-shadow: 0 5px 0 #880000;
         }
 
+        #mp-btn {
+            background: #ff44ff;
+            box-shadow: 0 5px 0 #880088;
+        }
+
         #death-screen { 
             position: absolute; 
             top:0; 
@@ -291,15 +372,6 @@
             cursor: pointer;
             color: black;
             font-weight: bold;
-        }
-
-        #base-walls {
-            position: absolute;
-            border: 3px solid #00ff00;
-            border-radius: 20px;
-            box-shadow: 0 0 50px #00ff00;
-            pointer-events: none;
-            z-index: 5;
         }
     </style>
 </head>
@@ -329,12 +401,24 @@
             <div class="craft-item" onclick="craftItem('medkit')">💊 АПТЕЧКА (2 бинта + 1 спирт)</div>
         </div>
 
+        <div id="mp-menu">
+            <h2>👥 МУЛЬТИПЛЕЕР</h2>
+            <div>ТВОЙ ID:</div>
+            <div id="my-id">...</div>
+            <input id="peer-id" placeholder="ВВЕДИ ID ДРУГА">
+            <button onclick="connectToPeer()">🔗 ПОДКЛЮЧИТЬСЯ</button>
+            <button onclick="hostGame()">👑 СОЗДАТЬ КОМНАТУ</button>
+            <div id="player-list"></div>
+            <button onclick="toggleMPMenu()">❌ ЗАКРЫТЬ</button>
+        </div>
+
         <div id="controls">
             <div>
                 <div class="btn" id="left-btn">←</div>
                 <div class="btn" id="right-btn">→</div>
             </div>
             <div>
+                <div class="btn" id="mp-btn" onclick="toggleMPMenu()">👥</div>
                 <div class="btn" id="gas-btn">↑</div>
                 <div class="btn" id="back-btn">↓</div>
                 <div class="btn" id="fire-btn">⚔️</div>
@@ -348,13 +432,14 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <script>
         (function() {
-            // ====================== ПЕРЕМЕННЫЕ ======================
+            // ====================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ======================
             let scene, camera, renderer, player;
             let zombies = [];
             let resources = [];
-            let baseWalls = [];
+            let otherPlayers = new Map(); // id -> { mesh, name }
             
             let hp = 100;
             let hunger = 100;
@@ -391,6 +476,262 @@
             let speed = 0;
             let cameraRot = 0;
             const MAP_SIZE = 250;
+            
+            // МУЛЬТИПЛЕЕР
+            let peer;
+            let connections = [];
+            let myId = '';
+            let playerName = 'Игрок_' + Math.floor(Math.random() * 1000);
+            let lastSentTime = 0;
+
+            // ====================== ИНИЦИАЛИЗАЦИЯ МУЛЬТИПЛЕЕРА ======================
+            function initMultiplayer() {
+                // Создаем Peer с уникальным ID
+                peer = new Peer();
+                
+                peer.on('open', (id) => {
+                    myId = id;
+                    document.getElementById('my-id').innerText = id.substring(0, 8);
+                    console.log('Мой ID:', id);
+                    
+                    // Добавляем себя в список игроков
+                    updatePlayerList();
+                });
+                
+                peer.on('connection', (conn) => {
+                    console.log('Кто-то подключился!');
+                    
+                    conn.on('open', () => {
+                        console.log('Соединение открыто');
+                        connections.push(conn);
+                        
+                        // Отправляем свой ID новому игроку
+                        conn.send({
+                            type: 'handshake',
+                            id: myId,
+                            name: playerName,
+                            x: player ? player.position.x : 0,
+                            z: player ? player.position.z : 0,
+                            rot: player ? player.rotation.y : 0
+                        });
+                        
+                        setupConnection(conn);
+                        updatePlayerList();
+                    });
+                });
+                
+                // Переподключение при ошибках
+                peer.on('disconnected', () => {
+                    console.log('Отключился, переподключаюсь...');
+                    peer.reconnect();
+                });
+            }
+
+            function setupConnection(conn) {
+                conn.on('data', (data) => {
+                    handleNetworkData(conn, data);
+                });
+                
+                conn.on('close', () => {
+                    console.log('Соединение закрыто');
+                    connections = connections.filter(c => c !== conn);
+                    
+                    // Удаляем игрока из сцены
+                    if (otherPlayers.has(conn.peer)) {
+                        scene.remove(otherPlayers.get(conn.peer).mesh);
+                        otherPlayers.delete(conn.peer);
+                    }
+                    
+                    updatePlayerList();
+                });
+                
+                conn.on('error', (err) => {
+                    console.log('Ошибка соединения:', err);
+                });
+            }
+
+            window.hostGame = function() {
+                // Просто открываем меню - уже готово
+                alert('Твой ID: ' + myId + '\nОтправь его друзьям!');
+            };
+
+            window.connectToPeer = function() {
+                const friendId = document.getElementById('peer-id').value;
+                if (!friendId) {
+                    alert('Введи ID друга!');
+                    return;
+                }
+                
+                console.log('Подключаемся к', friendId);
+                
+                const conn = peer.connect(friendId);
+                
+                conn.on('open', () => {
+                    console.log('Подключились!');
+                    connections.push(conn);
+                    
+                    // Отправляем свой ID
+                    conn.send({
+                        type: 'handshake',
+                        id: myId,
+                        name: playerName,
+                        x: player ? player.position.x : 0,
+                        z: player ? player.position.z : 0,
+                        rot: player ? player.rotation.y : 0
+                    });
+                    
+                    setupConnection(conn);
+                    updatePlayerList();
+                });
+                
+                conn.on('error', (err) => {
+                    console.log('Ошибка подключения:', err);
+                    alert('Не удалось подключиться. Проверь ID!');
+                });
+            };
+
+            function handleNetworkData(conn, data) {
+                if (!player) return;
+                
+                switch (data.type) {
+                    case 'handshake':
+                        // Новый игрок представился
+                        console.log('Handshake от', data.id);
+                        
+                        // Создаем его модельку
+                        const newPlayer = createOtherPlayer(data.name, 0xff44ff);
+                        newPlayer.position.set(data.x, 0, data.z);
+                        newPlayer.rotation.y = data.rot;
+                        scene.add(newPlayer);
+                        
+                        otherPlayers.set(data.id, {
+                            mesh: newPlayer,
+                            name: data.name
+                        });
+                        
+                        // Отправляем ему наше положение
+                        conn.send({
+                            type: 'pos',
+                            x: player.position.x,
+                            z: player.position.z,
+                            rot: player.rotation.y
+                        });
+                        
+                        // Отправляем всех зомби
+                        zombies.forEach(zombie => {
+                            conn.send({
+                                type: 'zombie_spawn',
+                                id: zombie.userData.id,
+                                x: zombie.position.x,
+                                z: zombie.position.z,
+                                health: zombie.userData.health
+                            });
+                        });
+                        
+                        updatePlayerList();
+                        break;
+                        
+                    case 'pos':
+                        // Обновляем позицию другого игрока
+                        if (otherPlayers.has(data.id)) {
+                            const other = otherPlayers.get(data.id);
+                            other.mesh.position.x = data.x;
+                            other.mesh.position.z = data.z;
+                            other.mesh.rotation.y = data.rot;
+                        }
+                        break;
+                        
+                    case 'zombie_spawn':
+                        // Спавним зомби у всех
+                        const existingZombie = zombies.find(z => z.userData.id === data.id);
+                        if (!existingZombie) {
+                            const zombie = createZombie(data.x, data.z);
+                            zombie.userData.id = data.id;
+                            zombie.userData.health = data.health;
+                            scene.add(zombie);
+                            zombies.push(zombie);
+                            updateZombieCount();
+                        }
+                        break;
+                        
+                    case 'zombie_hit':
+                        // Кто-то ударил зомби
+                        const zombie = zombies.find(z => z.userData.id === data.id);
+                        if (zombie) {
+                            zombie.userData.health -= data.damage;
+                            if (zombie.userData.health <= 0) {
+                                scene.remove(zombie);
+                                zombies = zombies.filter(z => z !== zombie);
+                                updateZombieCount();
+                            }
+                        }
+                        break;
+                        
+                    case 'resource_collect':
+                        // Кто-то собрал ресурс
+                        const res = resources.find(r => 
+                            Math.abs(r.position.x - data.x) < 1 && 
+                            Math.abs(r.position.z - data.z) < 1
+                        );
+                        if (res) {
+                            scene.remove(res);
+                            resources = resources.filter(r => r !== res);
+                        }
+                        break;
+                        
+                    case 'chat':
+                        // Сообщение в чат (можно добавить)
+                        console.log(data.name + ': ' + data.message);
+                        break;
+                }
+            }
+
+            function updatePlayerList() {
+                const listDiv = document.getElementById('player-list');
+                listDiv.innerHTML = '<div class="player-entry">👤 ' + playerName + ' (ты)</div>';
+                
+                connections.forEach(conn => {
+                    if (otherPlayers.has(conn.peer)) {
+                        const player = otherPlayers.get(conn.peer);
+                        listDiv.innerHTML += '<div class="player-entry">👥 ' + player.name + '</div>';
+                    }
+                });
+            }
+
+            function broadcast(data) {
+                connections.forEach(conn => {
+                    if (conn.open) {
+                        conn.send(data);
+                    }
+                });
+            }
+
+            // ====================== СОЗДАНИЕ ИГРОКА ДЛЯ ДРУГИХ ======================
+            function createOtherPlayer(name, color) {
+                const group = new THREE.Group();
+                
+                // Голова
+                const head = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.8, 0.8, 0.8),
+                    new THREE.MeshLambertMaterial({ color: 0xffcc99 })
+                );
+                head.position.y = 1.8;
+                head.castShadow = true;
+                group.add(head);
+                
+                // Тело
+                const body = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.8, 1.4, 0.4),
+                    new THREE.MeshLambertMaterial({ color: color })
+                );
+                body.position.y = 0.9;
+                body.castShadow = true;
+                group.add(body);
+                
+                // Имя над головой (можно добавить позже)
+                
+                return group;
+            }
 
             // ====================== ИНВЕНТАРЬ ======================
             function initInventory() {
@@ -479,6 +820,8 @@
                 
                 // Добавляем результат
                 addToInventory(recipeName, 1);
+                
+                playSound('craft');
             };
 
             // ====================== СОЗДАНИЕ МИРА ======================
@@ -502,54 +845,35 @@
                 ground.receiveShadow = true;
                 scene.add(ground);
                 
-                // БАЗА - теперь с коллизией!
-                const baseCenter = new THREE.Vector3(0, 0, 0);
-                
-                // Стены базы (непроходимые)
-                const wallPositions = [
-                    [15, 0], [15, 5], [15, -5], [15, 10], [15, -10],
-                    [-15, 0], [-15, 5], [-15, -5], [-15, 10], [-15, -10],
-                    [0, 15], [5, 15], [-5, 15], [10, 15], [-10, 15],
-                    [0, -15], [5, -15], [-5, -15], [10, -15], [-10, -15]
-                ];
-                
-                wallPositions.forEach(pos => {
-                    const wall = new THREE.Mesh(
-                        new THREE.BoxGeometry(2, 4, 2),
-                        new THREE.MeshLambertMaterial({ color: 0x8B4513 })
-                    );
-                    wall.position.set(pos[0], 2, pos[1]);
-                    wall.castShadow = true;
-                    wall.receiveShadow = true;
-                    
-                    // Добавляем коллизию
-                    wall.userData = {
-                        collider: {
-                            x: pos[0],
-                            z: pos[1],
-                            width: 2,
-                            length: 2,
-                            height: 4
-                        }
-                    };
-                    
-                    scene.add(wall);
-                    baseWalls.push(wall);
-                });
-                
-                // Зеленый круг базы
+                // База (зеленый круг)
                 const baseCircle = new THREE.Mesh(
-                    new THREE.CylinderGeometry(18, 18, 0.1, 32),
+                    new THREE.CylinderGeometry(15, 15, 0.1, 32),
                     new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.2 })
                 );
                 baseCircle.position.y = 0.05;
                 scene.add(baseCircle);
                 
+                // Стены базы
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const x = Math.cos(angle) * 15;
+                    const z = Math.sin(angle) * 15;
+                    
+                    const wall = new THREE.Mesh(
+                        new THREE.BoxGeometry(2, 3, 2),
+                        new THREE.MeshLambertMaterial({ color: 0x8B4513 })
+                    );
+                    wall.position.set(x, 1.5, z);
+                    wall.castShadow = true;
+                    wall.receiveShadow = true;
+                    scene.add(wall);
+                }
+                
                 // Ресурсы
-                for (let i = 0; i < 20; i++) {
+                for (let i = 0; i < 15; i++) {
                     const x = (Math.random() - 0.5) * 400;
                     const z = (Math.random() - 0.5) * 400;
-                    if (Math.sqrt(x*x + z*z) > 25) { // Не спавним в базе
+                    if (Math.sqrt(x*x + z*z) > 20) {
                         const types = ['wood', 'nails', 'bottle', 'gasoline', 'bandage', 'alcohol', 'can'];
                         const type = types[Math.floor(Math.random() * types.length)];
                         const resource = createResource(x, z, type);
@@ -559,19 +883,19 @@
                 }
                 
                 // Игрок
-                player = createRobloxHuman(0x44aaff);
-                player.position.set(5, 0, 5);
+                player = createPlayer(0x44aaff);
+                player.position.set(0, 0, 10);
                 scene.add(player);
                 
                 camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                camera.position.set(5, 10, 20);
-                camera.lookAt(5, 1, 5);
+                camera.position.set(0, 10, 20);
+                camera.lookAt(0, 1, 10);
             }
 
-            function createRobloxHuman(color) {
+            function createPlayer(color) {
                 const group = new THREE.Group();
                 
-                // Голова (кубическая)
+                // Голова
                 const head = new THREE.Mesh(
                     new THREE.BoxGeometry(0.8, 0.8, 0.8),
                     new THREE.MeshLambertMaterial({ color: 0xffcc99 })
@@ -607,7 +931,7 @@
             function createZombie(x, z) {
                 const group = new THREE.Group();
                 
-                // Зеленый зомби
+                // Тело
                 const body = new THREE.Mesh(
                     new THREE.BoxGeometry(0.8, 1.6, 0.4),
                     new THREE.MeshLambertMaterial({ color: 0x44aa44 })
@@ -616,6 +940,7 @@
                 body.castShadow = true;
                 group.add(body);
                 
+                // Голова
                 const head = new THREE.Mesh(
                     new THREE.BoxGeometry(0.8, 0.8, 0.8),
                     new THREE.MeshLambertMaterial({ color: 0x88aa88 })
@@ -639,6 +964,7 @@
                 group.position.set(x, 0, z);
                 
                 group.userData = {
+                    id: Math.random().toString(36).substring(7),
                     health: 30,
                     speed: 0.03,
                     attackDamage: 10,
@@ -669,20 +995,12 @@
                 box.castShadow = true;
                 group.add(box);
                 
-                // Свечение
-                const glow = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.5),
-                    new THREE.MeshBasicMaterial({ color: colors[type], transparent: true, opacity: 0.2 })
-                );
-                glow.position.y = 0.4;
-                group.add(glow);
-                
                 group.position.set(x, 0, z);
                 
                 group.userData = {
                     type: 'resource',
                     itemType: type,
-                    collected: false
+                    id: Math.random().toString(36).substring(7)
                 };
                 
                 return group;
@@ -694,20 +1012,18 @@
                 
                 const weapon = inventory[selectedSlot].item;
                 
-                // Если нет оружия или это не оружие - бьем кулаками
+                // Если нет оружия - кулаки
                 let damage = 10;
                 
                 if (weapon && items[weapon] && items[weapon].damage) {
                     damage = items[weapon].damage;
                     
-                    // Если это молотов - особый эффект
                     if (weapon === 'molotov') {
                         removeFromInventory('molotov', 1);
                         throwMolotov();
                         return;
                     }
                     
-                    // Если это аптечка - лечимся
                     if (weapon === 'medkit') {
                         hp = Math.min(100, hp + 50);
                         document.getElementById('hp-fill').style.width = hp + '%';
@@ -722,22 +1038,29 @@
                     if (dist < 3) {
                         zombie.userData.health -= damage;
                         
+                        // Отправляем урон всем
+                        broadcast({
+                            type: 'zombie_hit',
+                            id: zombie.userData.id,
+                            damage: damage
+                        });
+                        
                         if (zombie.userData.health <= 0) {
                             scene.remove(zombie);
                             zombies.splice(index, 1);
                             updateZombieCount();
                             
-                            // Шанс выпадения ресурса
                             if (Math.random() < 0.3) {
                                 addToInventory('can', 1);
                             }
                         }
+                        
+                        playSound('hit');
                     }
                 });
             };
 
             function throwMolotov() {
-                // Создаем огненное поле
                 const firePos = new THREE.Vector3(
                     player.position.x + Math.sin(player.rotation.y) * 5,
                     0,
@@ -752,10 +1075,16 @@
                 fire.position.y = 0.1;
                 scene.add(fire);
                 
-                // Урон зомби
                 zombies.forEach(zombie => {
                     if (zombie.position.distanceTo(firePos) < 4) {
                         zombie.userData.health -= 50;
+                        
+                        broadcast({
+                            type: 'zombie_hit',
+                            id: zombie.userData.id,
+                            damage: 50
+                        });
+                        
                         if (zombie.userData.health <= 0) {
                             scene.remove(zombie);
                         }
@@ -770,7 +1099,7 @@
                 if (!player) return;
                 
                 // Спавн зомби ночью
-                if (!dayTime && zombies.length < 10 + dayCount * 3) {
+                if (!dayTime && zombies.length < 10 + dayCount * 2) {
                     if (Math.random() < 0.01) {
                         const angle = Math.random() * Math.PI * 2;
                         const dist = 40 + Math.random() * 50;
@@ -780,32 +1109,67 @@
                         const zombie = createZombie(x, z);
                         scene.add(zombie);
                         zombies.push(zombie);
+                        
+                        // Отправляем всем
+                        broadcast({
+                            type: 'zombie_spawn',
+                            id: zombie.userData.id,
+                            x: x,
+                            z: z,
+                            health: 30
+                        });
+                        
                         updateZombieCount();
                     }
                 }
                 
-                // Зомби горят на солнце ☀️
+                // Зомби горят на солнце
                 if (dayTime) {
                     zombies.forEach(zombie => {
-                        zombie.userData.health -= 0.05; // Медленно горят
+                        zombie.userData.health -= 0.05;
+                        
+                        broadcast({
+                            type: 'zombie_hit',
+                            id: zombie.userData.id,
+                            damage: 0.05
+                        });
+                        
                         if (zombie.userData.health <= 0) {
                             scene.remove(zombie);
                         }
                     });
-                    // Фильтруем мертвых
+                    
                     zombies = zombies.filter(z => scene.children.includes(z));
                     updateZombieCount();
                 }
                 
-                // Движение зомби к игроку
+                // Движение зомби к ближайшему игроку
                 zombies.forEach(zombie => {
                     if (!zombie.parent) return;
                     
-                    const dist = player.position.distanceTo(zombie.position);
+                    // Ищем ближайшего игрока
+                    let closestDist = 1000;
+                    let closestPlayer = player;
                     
-                    if (dist < 20) {
-                        const dx = player.position.x - zombie.position.x;
-                        const dz = player.position.z - zombie.position.z;
+                    // Проверяем других игроков
+                    otherPlayers.forEach(other => {
+                        const dist = zombie.position.distanceTo(other.mesh.position);
+                        if (dist < closestDist) {
+                            closestDist = dist;
+                            closestPlayer = other.mesh;
+                        }
+                    });
+                    
+                    // Проверяем себя
+                    const selfDist = zombie.position.distanceTo(player.position);
+                    if (selfDist < closestDist) {
+                        closestDist = selfDist;
+                        closestPlayer = player;
+                    }
+                    
+                    if (closestDist < 20) {
+                        const dx = closestPlayer.position.x - zombie.position.x;
+                        const dz = closestPlayer.position.z - zombie.position.z;
                         const angle = Math.atan2(dx, dz);
                         
                         zombie.rotation.y = angle;
@@ -813,7 +1177,7 @@
                         zombie.position.z += Math.cos(angle) * zombie.userData.speed;
                         
                         // Атака
-                        if (dist < 2) {
+                        if (closestDist < 2 && closestPlayer === player) {
                             const now = Date.now();
                             if (now - zombie.userData.attackCooldown > 1000) {
                                 hp -= zombie.userData.attackDamage;
@@ -833,44 +1197,21 @@
                 if (!player) return;
                 
                 resources.forEach((resource, index) => {
-                    if (resource.userData.collected) return;
-                    
                     const dist = player.position.distanceTo(resource.position);
                     
                     if (dist < 2) {
                         addToInventory(resource.userData.itemType, 1);
                         scene.remove(resource);
                         resources.splice(index, 1);
+                        
+                        // Сообщаем всем, что ресурс собрали
+                        broadcast({
+                            type: 'resource_collect',
+                            x: resource.position.x,
+                            z: resource.position.z
+                        });
                     }
                 });
-            }
-
-            function checkCollisions() {
-                if (!player) return false;
-                
-                // Проверка стен базы
-                for (let wall of baseWalls) {
-                    if (!wall.userData?.collider) continue;
-                    
-                    const collider = wall.userData.collider;
-                    const halfW = collider.width / 2;
-                    const halfL = collider.length / 2;
-                    
-                    if (player.position.x + 1 > collider.x - halfW &&
-                        player.position.x - 1 < collider.x + halfW &&
-                        player.position.z + 1 > collider.z - halfL &&
-                        player.position.z - 1 < collider.z + halfL) {
-                        return true;
-                    }
-                }
-                
-                // Границы карты
-                if (Math.abs(player.position.x) > MAP_SIZE - 10 ||
-                    Math.abs(player.position.z) > MAP_SIZE - 10) {
-                    return true;
-                }
-                
-                return false;
             }
 
             function updateDayNight() {
@@ -888,14 +1229,13 @@
                 document.getElementById('day-night').innerHTML = 
                     (dayTime ? '☀️' : '🌙') + ` ДЕНЬ ${dayCount} | ${timeStr}`;
                 
-                // Меняем освещение
                 if (scene) {
                     scene.background.setHex(dayTime ? 0x87CEEB : 0x111122);
                 }
             }
 
             function updateHunger() {
-                hunger -= 0.002;
+                hunger -= 0.0015;
                 
                 if (hunger <= 0) {
                     hp -= 0.1;
@@ -903,7 +1243,6 @@
                     hunger = 0;
                 }
                 
-                // Автоматически едим, если есть консервы
                 if (hunger < 30) {
                     for (let i = 0; i < 8; i++) {
                         if (inventory[i].item === 'can') {
@@ -925,6 +1264,20 @@
                 document.getElementById('zombie-count').innerHTML = '🧟 ' + zombies.length;
             }
 
+            function playSound(type) {
+                // Заглушка для звуков
+            }
+
+            // ====================== УПРАВЛЕНИЕ МЕНЮ ======================
+            window.toggleMPMenu = function() {
+                const menu = document.getElementById('mp-menu');
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+                
+                if (menu.style.display === 'block') {
+                    updatePlayerList();
+                }
+            };
+
             // ====================== ЗАПУСК ======================
             window.startGame = function() {
                 document.getElementById('splash').style.display = 'none';
@@ -937,6 +1290,7 @@
                 
                 createGameWorld();
                 initInventory();
+                initMultiplayer();
                 
                 // Управление
                 document.getElementById('left-btn').ontouchstart = (e) => { e.preventDefault(); keys.left = 1; };
@@ -970,23 +1324,30 @@
                     if (keys.left) player.rotation.y += 0.05;
                     if (keys.right) player.rotation.y -= 0.05;
                     
-                    if (keys.g) speed += 0.05;
-                    else if (keys.b) speed -= 0.03;
+                    if (keys.g) speed += 0.04;
+                    else if (keys.b) speed -= 0.02;
                     else speed *= 0.9;
                     
-                    speed = Math.max(-0.3, Math.min(0.5, speed));
-                    
-                    const prevX = player.position.x;
-                    const prevZ = player.position.z;
+                    speed = Math.max(-0.2, Math.min(0.4, speed));
                     
                     player.position.x += Math.sin(player.rotation.y) * speed;
                     player.position.z += Math.cos(player.rotation.y) * speed;
                     
-                    // Проверка коллизий
-                    if (checkCollisions()) {
-                        player.position.x = prevX;
-                        player.position.z = prevZ;
-                        speed = 0;
+                    // Границы
+                    player.position.x = Math.max(-MAP_SIZE + 10, Math.min(MAP_SIZE - 10, player.position.x));
+                    player.position.z = Math.max(-MAP_SIZE + 10, Math.min(MAP_SIZE - 10, player.position.z));
+                    
+                    // Отправка позиции в мультиплеер (раз в 50мс)
+                    const now = Date.now();
+                    if (now - lastSentTime > 50) {
+                        broadcast({
+                            type: 'pos',
+                            id: myId,
+                            x: player.position.x,
+                            z: player.position.z,
+                            rot: player.rotation.y
+                        });
+                        lastSentTime = now;
                     }
                     
                     // Камера
@@ -1004,23 +1365,16 @@
             window.restartGame = function() {
                 document.getElementById('death-screen').style.display = 'none';
                 
-                while(scene.children.length > 0) scene.remove(scene.children[0]);
-                
                 hp = 100;
                 hunger = 100;
-                dayCount = 1;
-                timeOfDay = 12;
-                zombies = [];
-                resources = [];
-                baseWalls = [];
-                inventory = new Array(8).fill(null).map(() => ({ item: null, count: 0 }));
+                document.getElementById('hp-fill').style.width = '100%';
+                document.getElementById('hunger-fill').style.width = '100%';
                 
-                createGameWorld();
-                initInventory();
+                player.position.set(0, 0, 10);
             };
 
             document.getElementById('startBtn').addEventListener('click', startGame);
         })();
     </script>
 </body>
-                    </html>
+    </html>
