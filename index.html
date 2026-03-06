@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GTA: ZOMBIE APOCALYPSE</title>
+    <title>ZOMBIE SURVIVAL FIXED</title>
     <style>
         * {
             margin: 0;
@@ -27,79 +27,39 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(ellipse at center, #2a0a0a 0%, #000000 100%);
+            background: linear-gradient(135deg, #1a3a1a, #0a2a0a);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            overflow: hidden;
-        }
-
-        .blood-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(100,0,0,0.3) 0%, transparent 70%);
-            pointer-events: none;
-            animation: bloodPulse 3s infinite;
-        }
-
-        @keyframes bloodPulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.6; }
         }
 
         .logo {
-            font-size: 90px;
+            font-size: 80px;
             font-weight: 900;
-            color: transparent;
-            -webkit-text-stroke: 4px #ff0000;
-            text-shadow: 0 0 40px #ff0000, 0 0 80px #660000, 0 0 120px #330000;
-            letter-spacing: 15px;
+            color: #ffaa00;
+            text-shadow: 5px 5px 0 #ff0000;
             margin-bottom: 20px;
-            position: relative;
-            z-index: 20;
-            animation: logoFloat 3s ease-in-out infinite;
-        }
-
-        .logo span {
-            color: #ff0000;
-            -webkit-text-stroke: 0;
-            font-size: 110px;
-            text-shadow: 0 0 60px #ff0000, 0 0 120px #660000;
-        }
-
-        .subtitle {
-            font-size: 32px;
-            color: #f00;
-            text-shadow: 0 0 30px #f00, 0 0 60px #a00, 0 0 90px #800;
-            margin-bottom: 60px;
-            letter-spacing: 8px;
         }
 
         #startBtn {
             padding: 20px 80px;
-            background: linear-gradient(135deg, #ff0000, #660000);
+            background: #00ff00;
             border: none;
-            border-radius: 60px;
-            color: white;
+            border-radius: 50px;
+            color: black;
             font-size: 40px;
             font-weight: bold;
             cursor: pointer;
-            border: 4px solid rgba(255,0,0,0.8);
-            box-shadow: 0 0 40px #ff0000, 0 0 80px #660000;
-            transition: 0.3s;
-            position: relative;
-            z-index: 30;
-            animation: buttonPulse 2s infinite;
+            border: 4px solid #ffff00;
+            box-shadow: 0 10px 0 #008800;
+            transition: 0.05s linear;
         }
 
-        @keyframes buttonPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 40px #ff0000, 0 0 80px #660000; }
-            50% { transform: scale(1.05); box-shadow: 0 0 60px #ff0000, 0 0 120px #660000, 0 0 180px #330000; }
+        #startBtn:active {
+            transform: translateY(10px);
+            box-shadow: 0 0px 0 #008800;
         }
 
         #game {
@@ -116,37 +76,21 @@
             position: absolute; 
             top: 10px; 
             left: 10px; 
-            color: white; 
-            z-index: 10; 
             background: rgba(0,0,0,0.8); 
-            padding: 12px 20px; 
+            padding: 15px; 
             border-radius: 15px; 
-            border: 2px solid #f00; 
-            font-size: 16px;
-            backdrop-filter: blur(5px);
-            min-width: 250px;
-        }
-
-        #day-night {
-            font-size: 20px;
-            margin-bottom: 5px;
-            color: #ffaa00;
-            text-shadow: 0 0 10px #ffaa00;
-        }
-
-        #hunger {
-            font-size: 18px;
-            margin-bottom: 5px;
-            color: #ffaa00;
+            border: 3px solid #ffaa00; 
+            z-index: 10;
+            min-width: 200px;
         }
         
         #hp-bar { 
             width: 200px; 
-            height: 18px; 
+            height: 20px; 
             background: #300; 
             border: 2px solid #f00; 
-            border-radius: 9px; 
-            margin-top: 8px; 
+            border-radius: 10px; 
+            margin: 5px 0;
             overflow: hidden;
         }
         
@@ -154,89 +98,86 @@
             width: 100%; 
             height: 100%; 
             background: linear-gradient(90deg, #f00, #ff0, #0f0); 
-            border-radius: 7px; 
-            transition: width 0.2s;
+        }
+
+        #hunger-bar {
+            width: 200px;
+            height: 20px;
+            background: #333;
+            border: 2px solid #ffaa00;
+            border-radius: 10px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+
+        #hunger-fill {
+            width: 100%;
+            height: 100%;
+            background: #ffaa00;
+        }
+
+        #day-night {
+            font-size: 20px;
+            color: #ffaa00;
+            margin-bottom: 5px;
         }
 
         #zombie-count {
             position: absolute;
             top: 10px;
             right: 10px;
-            color: #f00;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 3px solid #f00;
             font-size: 24px;
-            background: rgba(0,0,0,0.8);
-            padding: 8px 20px;
-            border-radius: 30px;
-            border: 2px solid #f00;
-            backdrop-filter: blur(5px);
-            text-shadow: 0 0 15px #f00;
-        }
-
-        #shelter-status {
-            position: absolute;
-            top: 60px;
-            right: 10px;
-            color: #0f0;
-            font-size: 18px;
-            background: rgba(0,0,0,0.8);
-            padding: 8px 20px;
-            border-radius: 30px;
-            border: 2px solid #0f0;
-            backdrop-filter: blur(5px);
+            color: #f00;
         }
 
         #inventory {
             position: absolute;
             bottom: 100px;
-            left: 10px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
             gap: 5px;
             background: rgba(0,0,0,0.8);
             padding: 10px;
-            border-radius: 15px;
-            border: 2px solid #f80;
+            border-radius: 20px;
+            border: 3px solid #ffaa00;
+            z-index: 20;
         }
 
         .slot {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             background: rgba(255,255,255,0.1);
-            border: 2px solid #f80;
+            border: 2px solid #ffaa00;
             border-radius: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 20px;
+            font-size: 30px;
             position: relative;
             cursor: pointer;
         }
 
         .slot.selected {
-            border-color: #0ff;
-            box-shadow: 0 0 20px #0ff;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px #00ffff;
+            transform: scale(1.05);
         }
 
         .slot-count {
             position: absolute;
             bottom: 2px;
             right: 5px;
-            font-size: 12px;
-            color: #ffaa00;
-        }
-
-        .slot-drop {
-            position: absolute;
-            top: -20px;
-            left: 0;
-            font-size: 12px;
-            color: #f00;
-            display: none;
-        }
-
-        .slot:hover .slot-drop {
-            display: block;
+            font-size: 14px;
+            background: #ffaa00;
+            color: black;
+            padding: 2px 5px;
+            border-radius: 10px;
         }
 
         #craft-menu {
@@ -245,36 +186,31 @@
             right: 10px;
             background: rgba(0,0,0,0.9);
             padding: 15px;
-            border-radius: 15px;
-            border: 2px solid #ffaa00;
-            width: 200px;
+            border-radius: 20px;
+            border: 3px solid #ffaa00;
+            width: 250px;
+            z-index: 20;
         }
 
         .craft-title {
             color: #ffaa00;
             text-align: center;
             margin-bottom: 10px;
-            font-size: 18px;
+            font-size: 20px;
         }
 
         .craft-item {
             background: rgba(255,255,255,0.1);
             padding: 8px;
             margin: 5px 0;
-            border-radius: 8px;
-            border: 1px solid #ffaa00;
+            border-radius: 10px;
+            border: 2px solid #ffaa00;
             cursor: pointer;
             font-size: 14px;
         }
 
         .craft-item:active {
-            transform: scale(0.98);
             background: rgba(255,170,0,0.3);
-        }
-
-        .craft-item.disabled {
-            opacity: 0.5;
-            pointer-events: none;
         }
 
         #controls { 
@@ -298,49 +234,35 @@
         .btn { 
             width: 70px; 
             height: 70px; 
-            background: radial-gradient(circle at 30% 30%, #f00, #300); 
-            border: 3px solid #f00; 
-            border-radius: 50%; 
+            background: #ff4444; 
+            border: 3px solid #ffff00; 
+            border-radius: 35px; 
             color: white; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 28px; 
-            box-shadow: 0 0 25px #f00; 
-            backdrop-filter: blur(5px);
-            transition: 0.1s;
+            font-size: 30px; 
+            box-shadow: 0 5px 0 #880000; 
         }
 
-        .btn:active { transform: scale(0.85); }
+        .btn:active { 
+            transform: translateY(5px);
+            box-shadow: none;
+        }
 
         #gas-btn {
-            background: radial-gradient(circle at 30% 30%, #0ff, #033); 
-            border-color: #0ff; 
-            box-shadow: 0 0 25px #0ff;
+            background: #44ff44;
+            box-shadow: 0 5px 0 #008800;
         }
 
         #back-btn {
-            background: radial-gradient(circle at 30% 30%, #ffaa00, #442200); 
-            border-color: #ffaa00; 
-            box-shadow: 0 0 25px #ffaa00;
-        }
-
-        #left-btn, #right-btn {
-            background: radial-gradient(circle at 30% 30%, #0ff, #033);
-            border-color: #0ff;
-            box-shadow: 0 0 25px #0ff;
+            background: #ffaa44;
+            box-shadow: 0 5px 0 #885500;
         }
 
         #fire-btn {
-            background: radial-gradient(circle at 30% 30%, #f00, #300); 
-            border-color: #f00; 
-            box-shadow: 0 0 25px #f00;
-        }
-
-        #action-btn {
-            background: radial-gradient(circle at 30% 30%, #0f0, #030);
-            border-color: #0f0;
-            box-shadow: 0 0 25px #0f0;
+            background: #ff0000;
+            box-shadow: 0 5px 0 #880000;
         }
 
         #death-screen { 
@@ -354,237 +276,123 @@
             align-items: center; 
             justify-content: center; 
             z-index:200; 
-            background: rgba(100,0,0,0.95); 
+            background: rgba(0,0,0,0.9); 
             color:white; 
-            font-size: 80px; 
-            text-shadow: 0 0 30px red;
-            backdrop-filter: blur(10px);
+            font-size: 60px; 
         }
 
         #restart-btn {
-            padding: 20px 60px;
-            border: 4px solid white;
-            border-radius: 60px;
-            font-size: 32px;
-            margin-top: 40px;
+            padding: 15px 50px;
+            background: #00ff00;
+            border: 4px solid #ffff00;
+            border-radius: 40px;
+            font-size: 30px;
+            margin-top: 30px;
             cursor: pointer;
-            background: linear-gradient(135deg, #0f0, #0a0);
             color: black;
-            box-shadow: 0 0 40px #0f0;
-        }
-
-        #mp-menu {
-            position: absolute;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.9);
-            padding: 15px;
-            border-radius: 15px;
-            border: 2px solid #f00;
-            z-index: 100;
-            backdrop-filter: blur(5px);
-            display: none;
-        }
-
-        #mp-menu input {
-            padding: 8px;
-            margin: 5px 0;
-            border-radius: 8px;
-            border: 2px solid #f00;
-            background: #222;
-            color: white;
-            width: 150px;
-        }
-
-        #mp-menu button {
-            padding: 8px 15px;
-            background: linear-gradient(135deg, #f00, #600);
-            border: none;
-            border-radius: 8px;
-            color: white;
             font-weight: bold;
-            cursor: pointer;
-            margin: 5px;
         }
 
-        #my-id {
-            color: #f00;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        #camera-touch-area {
+        #base-walls {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            border: 3px solid #00ff00;
+            border-radius: 20px;
+            box-shadow: 0 0 50px #00ff00;
+            pointer-events: none;
             z-index: 5;
-        }
-
-        .shelter-area {
-            position: absolute;
-            border: 3px solid #0f0;
-            border-radius: 50%;
-            box-shadow: 0 0 50px #0f0;
-            pointer-events: none;
-            z-index: 15;
-        }
-
-        .blood-particle {
-            position: absolute;
-            background: #f00;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 100;
-            animation: bloodFade 1s forwards;
-        }
-
-        @keyframes bloodFade {
-            0% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(2); }
         }
     </style>
 </head>
 <body>
     <div id="splash">
-        <div class="blood-overlay"></div>
-        <div class="logo"><span>ZOMBIE</span> APOCALYPSE</div>
-        <div class="subtitle">ВЫЖИВАНИЕ С ДРУЗЬЯМИ</div>
-        <button id="startBtn">🧟 НАЧАТЬ</button>
+        <div class="logo">🧟 ZOMBIE SURVIVAL</div>
+        <button id="startBtn">▶ СТАРТ</button>
     </div>
 
     <div id="game">
-        <div id="camera-touch-area"></div>
-        
         <div id="ui">
-            <div id="day-night">☀️ ДЕНЬ 1 | 10:00</div>
-            <div id="hunger">🍞 ГОЛОД: 100%</div>
-            <div>💰 <span id="money">0</span></div>
+            <div id="day-night">☀️ ДЕНЬ 1 | 12:00</div>
+            <div>❤️ ЗДОРОВЬЕ</div>
             <div id="hp-bar"><div id="hp-fill" style="width:100%"></div></div>
+            <div>🍗 ГОЛОД</div>
+            <div id="hunger-bar"><div id="hunger-fill" style="width:100%"></div></div>
         </div>
 
-        <div id="zombie-count">🧟 ЗОМБИ: 0</div>
-        <div id="shelter-status">🏠 В УБЕЖИЩЕ: ДА</div>
+        <div id="zombie-count">🧟 0</div>
 
-        <div id="inventory">
-            <!-- Слоты инвентаря будут добавлены через JS -->
-        </div>
+        <div id="inventory"></div>
 
         <div id="craft-menu">
             <div class="craft-title">🔨 КРАФТ</div>
-            <div id="craft-bat" class="craft-item" onclick="craftItem('bat')">🪓 БИТА (2 дерево + 1 гвозди)</div>
-            <div id="craft-molotov" class="craft-item" onclick="craftItem('molotov')">🔥 МОЛОТОВ (1 бутылка + 1 бензин)</div>
-            <div id="craft-medkit" class="craft-item" onclick="craftItem('medkit')">💊 АПТЕЧКА (2 бинта + 1 спирт)</div>
+            <div class="craft-item" onclick="craftItem('bat')">🪓 БИТА (2 дерева + 1 гвозди)</div>
+            <div class="craft-item" onclick="craftItem('molotov')">🔥 МОЛОТОВ (1 бутылка + 1 бензин)</div>
+            <div class="craft-item" onclick="craftItem('medkit')">💊 АПТЕЧКА (2 бинта + 1 спирт)</div>
+        </div>
+
+        <div id="controls">
+            <div>
+                <div class="btn" id="left-btn">←</div>
+                <div class="btn" id="right-btn">→</div>
+            </div>
+            <div>
+                <div class="btn" id="gas-btn">↑</div>
+                <div class="btn" id="back-btn">↓</div>
+                <div class="btn" id="fire-btn">⚔️</div>
+            </div>
         </div>
 
         <div id="death-screen">
             <div>💀 ТЫ УМЕР 💀</div>
             <div id="restart-btn" onclick="restartGame()">⟲ ЗАНОВО</div>
         </div>
-
-        <div id="mp-menu">
-            <div style="color:#f00; margin-bottom:10px;">👥 МУЛЬТИПЛЕЕР</div>
-            <div>ID: <span id="my-id">...</span></div>
-            <input id="peer-id" placeholder="ID друга">
-            <button onclick="connectToPeer()">🔗 ПОДКЛЮЧИТЬСЯ</button>
-            <button onclick="toggleMPMenu()">❌ ЗАКРЫТЬ</button>
-        </div>
-
-        <div id="controls">
-            <div>
-                <div class="btn" id="action-btn">🔑</div>
-                <div style="display:flex; gap:15px;">
-                    <div class="btn" id="left-btn">👈</div>
-                    <div class="btn" id="right-btn">👉</div>
-                </div>
-            </div>
-            <div>
-                <div style="display:flex; gap:10px; margin-bottom:10px;">
-                    <div class="btn" id="mp-btn" onclick="toggleMPMenu()">👥</div>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <div class="btn" id="gas-btn">⬆️</div>
-                    <div class="btn" id="back-btn">⬇️</div>
-                    <div class="btn" id="fire-btn">🔥</div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <script>
         (function() {
-            // ====================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ======================
+            // ====================== ПЕРЕМЕННЫЕ ======================
             let scene, camera, renderer, player;
             let zombies = [];
             let resources = [];
-            let buildings = [];
-            let shelter;
+            let baseWalls = [];
             
             let hp = 100;
             let hunger = 100;
-            let money = 0;
-            
-            let dayTime = true;
             let dayCount = 1;
-            let timeOfDay = 10; // 0-24 часа
-            let timeSpeed = 0.005; // Скорость течения времени
+            let timeOfDay = 12;
+            let dayTime = true;
             
-            let inShelter = true;
-            const shelterPos = { x: 0, z: 0 };
-            const shelterRadius = 20;
-            
-            // Инвентарь: 8 слотов
-            let inventory = [
-                { item: null, count: 0 },
-                { item: null, count: 0 },
-                { item: null, count: 0 },
-                { item: null, count: 0 },
-                { item: null, count: 0 },
-                { item: null, count: 0 },
-                { item: null, count: 0 },
-                { item: null, count: 0 }
-            ];
+            // Инвентарь
+            let inventory = new Array(8).fill(null).map(() => ({ item: null, count: 0 }));
             let selectedSlot = 0;
             
-            // Рецепты крафта
-            const recipes = {
-                'bat': { wood: 2, nails: 1, result: 'bat' },
-                'molotov': { bottle: 1, gasoline: 1, result: 'molotov' },
-                'medkit': { bandage: 2, alcohol: 1, result: 'medkit' }
+            // Предметы
+            const items = {
+                'wood': { name: 'Дерево', emoji: '🪵', stack: 20 },
+                'nails': { name: 'Гвозди', emoji: '📌', stack: 20 },
+                'bottle': { name: 'Бутылка', emoji: '🍾', stack: 10 },
+                'gasoline': { name: 'Бензин', emoji: '⛽', stack: 10 },
+                'bandage': { name: 'Бинт', emoji: '🩹', stack: 15 },
+                'alcohol': { name: 'Спирт', emoji: '🧪', stack: 10 },
+                'can': { name: 'Консервы', emoji: '🥫', stack: 15 },
+                'bat': { name: 'Бита', emoji: '🪓', stack: 1, damage: 30 },
+                'molotov': { name: 'Молотов', emoji: '🔥', stack: 5, damage: 50 },
+                'medkit': { name: 'Аптечка', emoji: '💊', stack: 5, heal: 50 }
             };
             
-            // Типы предметов
-            const itemTypes = {
-                'wood': { name: 'Древесина', emoji: '🪵' },
-                'nails': { name: 'Гвозди', emoji: '📌' },
-                'bottle': { name: 'Бутылка', emoji: '🍾' },
-                'gasoline': { name: 'Бензин', emoji: '⛽' },
-                'bandage': { name: 'Бинт', emoji: '🩹' },
-                'alcohol': { name: 'Спирт', emoji: '🧪' },
-                'can': { name: 'Консервы', emoji: '🥫' },
-                'medkit': { name: 'Аптечка', emoji: '💊' },
-                'bat': { name: 'Бита', emoji: '🪓' },
-                'molotov': { name: 'Молотов', emoji: '🔥' }
+            // Рецепты
+            const recipes = {
+                'bat': { wood: 2, nails: 1 },
+                'molotov': { bottle: 1, gasoline: 1 },
+                'medkit': { bandage: 2, alcohol: 1 }
             };
             
             let keys = { g: 0, b: 0, left: 0, right: 0 };
             let speed = 0;
-            let cameraRot = 0, targetCameraRot = 0;
-            const MAP_SIZE = 280;
-            
-            // Мультиплеер
-            let peer, conn, otherPlayers = new Map();
-            
-            // Звуки
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            const audioCtx = new AudioContext();
-            let soundEnabled = true;
+            let cameraRot = 0;
+            const MAP_SIZE = 250;
 
-            // ====================== ИНИЦИАЛИЗАЦИЯ ======================
+            // ====================== ИНВЕНТАРЬ ======================
             function initInventory() {
                 const container = document.getElementById('inventory');
                 container.innerHTML = '';
@@ -592,17 +400,15 @@
                 for (let i = 0; i < 8; i++) {
                     const slot = document.createElement('div');
                     slot.className = 'slot' + (i === selectedSlot ? ' selected' : '');
-                    slot.setAttribute('data-slot', i);
                     
                     if (inventory[i].item) {
-                        const item = itemTypes[inventory[i].item];
+                        const item = items[inventory[i].item];
                         slot.innerHTML = `
                             <span>${item.emoji}</span>
                             <span class="slot-count">${inventory[i].count}</span>
-                            <span class="slot-drop" onclick="dropItem(${i})">❌</span>
                         `;
                     } else {
-                        slot.innerHTML = '<span style="opacity:0.3">⬜</span>';
+                        slot.innerHTML = '<span>⬜</span>';
                     }
                     
                     slot.onclick = () => selectSlot(i);
@@ -615,32 +421,15 @@
                 initInventory();
             };
 
-            window.dropItem = function(slotIndex) {
-                if (inventory[slotIndex].item && player) {
-                    // Создаём ресурс на земле
-                    createResourceItem(
-                        player.position.x + Math.sin(player.rotation.y) * 3,
-                        player.position.z + Math.cos(player.rotation.y) * 3,
-                        inventory[slotIndex].item,
-                        inventory[slotIndex].count
-                    );
-                    
-                    inventory[slotIndex] = { item: null, count: 0 };
-                    initInventory();
-                }
-            };
-
             function addToInventory(item, count = 1) {
-                // Сначала ищем такой же предмет
                 for (let i = 0; i < 8; i++) {
-                    if (inventory[i].item === item) {
+                    if (inventory[i].item === item && inventory[i].count < (items[item]?.stack || 1)) {
                         inventory[i].count += count;
                         initInventory();
                         return true;
                     }
                 }
                 
-                // Ищем пустой слот
                 for (let i = 0; i < 8; i++) {
                     if (inventory[i].item === null) {
                         inventory[i].item = item;
@@ -649,14 +438,12 @@
                         return true;
                     }
                 }
-                
-                // Инвентарь полон
                 return false;
             }
 
             function removeFromInventory(item, count = 1) {
                 for (let i = 0; i < 8; i++) {
-                    if (inventory[i].item === item && inventory[i].count >= count) {
+                    if (inventory[i].item === item) {
                         inventory[i].count -= count;
                         if (inventory[i].count <= 0) {
                             inventory[i].item = null;
@@ -673,131 +460,197 @@
                 const recipe = recipes[recipeName];
                 if (!recipe) return;
                 
-                // Проверяем наличие ресурсов
-                let canCraft = true;
-                for (let [resource, needed] of Object.entries(recipe)) {
-                    if (resource === 'result') continue;
-                    
+                // Проверяем ресурсы
+                for (let [res, need] of Object.entries(recipe)) {
                     let total = 0;
                     for (let i = 0; i < 8; i++) {
-                        if (inventory[i].item === resource) {
-                            total += inventory[i].count;
-                        }
+                        if (inventory[i].item === res) total += inventory[i].count;
                     }
-                    if (total < needed) {
-                        canCraft = false;
-                        break;
+                    if (total < need) {
+                        alert(`Нужно ${need} ${res}`);
+                        return;
                     }
                 }
                 
-                if (canCraft) {
-                    // Забираем ресурсы
-                    for (let [resource, needed] of Object.entries(recipe)) {
-                        if (resource === 'result') continue;
-                        removeFromInventory(resource, needed);
-                    }
-                    
-                    // Добавляем результат
-                    addToInventory(recipe.result, 1);
-                    playSound('craft');
+                // Забираем ресурсы
+                for (let [res, need] of Object.entries(recipe)) {
+                    removeFromInventory(res, need);
                 }
+                
+                // Добавляем результат
+                addToInventory(recipeName, 1);
             };
 
-            // ====================== СОЗДАНИЕ ЗОМБИ ======================
-            function createZombie(x, z, type = 'normal') {
+            // ====================== СОЗДАНИЕ МИРА ======================
+            function createGameWorld() {
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x87CEEB);
+                
+                // Освещение
+                const sunLight = new THREE.DirectionalLight(0xffffff, 1);
+                sunLight.position.set(50, 100, 50);
+                sunLight.castShadow = true;
+                scene.add(sunLight);
+                scene.add(new THREE.AmbientLight(0x404060));
+                
+                // Земля
+                const groundGeo = new THREE.PlaneGeometry(600, 600);
+                const groundMat = new THREE.MeshLambertMaterial({ color: 0x2a5a2a });
+                const ground = new THREE.Mesh(groundGeo, groundMat);
+                ground.rotation.x = -Math.PI/2;
+                ground.position.y = -0.1;
+                ground.receiveShadow = true;
+                scene.add(ground);
+                
+                // БАЗА - теперь с коллизией!
+                const baseCenter = new THREE.Vector3(0, 0, 0);
+                
+                // Стены базы (непроходимые)
+                const wallPositions = [
+                    [15, 0], [15, 5], [15, -5], [15, 10], [15, -10],
+                    [-15, 0], [-15, 5], [-15, -5], [-15, 10], [-15, -10],
+                    [0, 15], [5, 15], [-5, 15], [10, 15], [-10, 15],
+                    [0, -15], [5, -15], [-5, -15], [10, -15], [-10, -15]
+                ];
+                
+                wallPositions.forEach(pos => {
+                    const wall = new THREE.Mesh(
+                        new THREE.BoxGeometry(2, 4, 2),
+                        new THREE.MeshLambertMaterial({ color: 0x8B4513 })
+                    );
+                    wall.position.set(pos[0], 2, pos[1]);
+                    wall.castShadow = true;
+                    wall.receiveShadow = true;
+                    
+                    // Добавляем коллизию
+                    wall.userData = {
+                        collider: {
+                            x: pos[0],
+                            z: pos[1],
+                            width: 2,
+                            length: 2,
+                            height: 4
+                        }
+                    };
+                    
+                    scene.add(wall);
+                    baseWalls.push(wall);
+                });
+                
+                // Зеленый круг базы
+                const baseCircle = new THREE.Mesh(
+                    new THREE.CylinderGeometry(18, 18, 0.1, 32),
+                    new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.2 })
+                );
+                baseCircle.position.y = 0.05;
+                scene.add(baseCircle);
+                
+                // Ресурсы
+                for (let i = 0; i < 20; i++) {
+                    const x = (Math.random() - 0.5) * 400;
+                    const z = (Math.random() - 0.5) * 400;
+                    if (Math.sqrt(x*x + z*z) > 25) { // Не спавним в базе
+                        const types = ['wood', 'nails', 'bottle', 'gasoline', 'bandage', 'alcohol', 'can'];
+                        const type = types[Math.floor(Math.random() * types.length)];
+                        const resource = createResource(x, z, type);
+                        scene.add(resource);
+                        resources.push(resource);
+                    }
+                }
+                
+                // Игрок
+                player = createRobloxHuman(0x44aaff);
+                player.position.set(5, 0, 5);
+                scene.add(player);
+                
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.set(5, 10, 20);
+                camera.lookAt(5, 1, 5);
+            }
+
+            function createRobloxHuman(color) {
                 const group = new THREE.Group();
                 
-                // Типы зомби
-                const types = {
-                    'normal': { color: 0x44aa44, speed: 0.05, health: 50, damage: 10, scale: 1.0 },
-                    'fat': { color: 0x228822, speed: 0.03, health: 120, damage: 20, scale: 1.3 },
-                    'fast': { color: 0x88ff88, speed: 0.08, health: 30, damage: 8, scale: 0.9 },
-                    'explosive': { color: 0xff5555, speed: 0.06, health: 40, damage: 15, scale: 1.1, explode: true }
-                };
-                
-                const zombieType = types[type] || types.normal;
-                
-                // Тело
-                const body = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.4 * zombieType.scale, 0.4 * zombieType.scale, 1.8 * zombieType.scale),
-                    new THREE.MeshLambertMaterial({ color: zombieType.color })
-                );
-                body.position.y = 0.9 * zombieType.scale;
-                body.castShadow = true;
-                group.add(body);
-                
-                // Голова
+                // Голова (кубическая)
                 const head = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.3 * zombieType.scale),
-                    new THREE.MeshLambertMaterial({ color: 0x88aa88 })
+                    new THREE.BoxGeometry(0.8, 0.8, 0.8),
+                    new THREE.MeshLambertMaterial({ color: 0xffcc99 })
                 );
-                head.position.y = 1.9 * zombieType.scale;
+                head.position.y = 1.8;
                 head.castShadow = true;
                 group.add(head);
                 
-                // Глаза (красные)
-                const eyeGeo = new THREE.SphereGeometry(0.05 * zombieType.scale);
-                const eyeMat = new THREE.MeshLambertMaterial({ color: 0xff0000, emissive: 0x330000 });
+                // Тело
+                const body = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.8, 1.4, 0.4),
+                    new THREE.MeshLambertMaterial({ color: color })
+                );
+                body.position.y = 0.9;
+                body.castShadow = true;
+                group.add(body);
+                
+                // Глаза
+                const eyeGeo = new THREE.BoxGeometry(0.15, 0.15, 0.1);
+                const eyeMat = new THREE.MeshLambertMaterial({ color: 0x000000 });
                 
                 const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-                leftEye.position.set(-0.15 * zombieType.scale, 2.0 * zombieType.scale, 0.25 * zombieType.scale);
+                leftEye.position.set(-0.2, 2.0, 0.4);
                 group.add(leftEye);
                 
                 const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
-                rightEye.position.set(0.15 * zombieType.scale, 2.0 * zombieType.scale, 0.25 * zombieType.scale);
+                rightEye.position.set(0.2, 2.0, 0.4);
                 group.add(rightEye);
                 
-                // Руки (кривые)
-                const armGeo = new THREE.CylinderGeometry(0.1 * zombieType.scale, 0.1 * zombieType.scale, 0.8 * zombieType.scale);
-                const armMat = new THREE.MeshLambertMaterial({ color: zombieType.color });
+                return group;
+            }
+
+            function createZombie(x, z) {
+                const group = new THREE.Group();
                 
-                const leftArm = new THREE.Mesh(armGeo, armMat);
-                leftArm.position.set(-0.6 * zombieType.scale, 1.2 * zombieType.scale, 0);
-                leftArm.rotation.z = 0.3;
-                leftArm.rotation.x = 0.2;
-                leftArm.castShadow = true;
-                group.add(leftArm);
-                
-                const rightArm = new THREE.Mesh(armGeo, armMat);
-                rightArm.position.set(0.6 * zombieType.scale, 1.2 * zombieType.scale, 0);
-                rightArm.rotation.z = -0.3;
-                rightArm.rotation.x = -0.2;
-                rightArm.castShadow = true;
-                group.add(rightArm);
-                
-                // Лохмотья
-                const clothMat = new THREE.MeshLambertMaterial({ color: 0x442211 });
-                const cloth = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.5 * zombieType.scale, 0.3 * zombieType.scale, 0.5 * zombieType.scale),
-                    clothMat
+                // Зеленый зомби
+                const body = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.8, 1.6, 0.4),
+                    new THREE.MeshLambertMaterial({ color: 0x44aa44 })
                 );
-                cloth.position.set(0, 0.8 * zombieType.scale, 0.2 * zombieType.scale);
-                group.add(cloth);
+                body.position.y = 0.8;
+                body.castShadow = true;
+                group.add(body);
+                
+                const head = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.8, 0.8, 0.8),
+                    new THREE.MeshLambertMaterial({ color: 0x88aa88 })
+                );
+                head.position.y = 1.8;
+                head.castShadow = true;
+                group.add(head);
+                
+                // Красные глаза
+                const eyeGeo = new THREE.BoxGeometry(0.15, 0.15, 0.1);
+                const eyeMat = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+                
+                const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+                leftEye.position.set(-0.2, 2.0, 0.4);
+                group.add(leftEye);
+                
+                const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+                rightEye.position.set(0.2, 2.0, 0.4);
+                group.add(rightEye);
                 
                 group.position.set(x, 0, z);
                 
                 group.userData = {
-                    health: zombieType.health,
-                    maxHealth: zombieType.health,
-                    speed: zombieType.speed,
-                    attackDamage: zombieType.damage,
-                    attackCooldown: 0,
-                    type: 'zombie',
-                    zombieType: type,
-                    scale: zombieType.scale,
-                    explodeOnDeath: zombieType.explode || false,
-                    target: null,
-                    state: 'idle' // idle, chasing, attacking
+                    health: 30,
+                    speed: 0.03,
+                    attackDamage: 10,
+                    attackCooldown: 0
                 };
                 
                 return group;
             }
 
-            // ====================== РЕСУРСЫ ======================
-            function createResourceItem(x, z, itemType, count = 1) {
+            function createResource(x, z, type) {
                 const group = new THREE.Group();
                 
-                // Цвета для разных ресурсов
                 const colors = {
                     'wood': 0x8B4513,
                     'nails': 0xC0C0C0,
@@ -805,18 +658,12 @@
                     'gasoline': 0xFFA500,
                     'bandage': 0xFFFFFF,
                     'alcohol': 0x87CEEB,
-                    'can': 0xFFD700,
-                    'medkit': 0xFF1493,
-                    'bat': 0xA0522D,
-                    'molotov': 0xFF4500
+                    'can': 0xFFD700
                 };
                 
-                const color = colors[itemType] || 0xCCCCCC;
-                
-                // Ящик с предметом
                 const box = new THREE.Mesh(
                     new THREE.BoxGeometry(0.8, 0.8, 0.8),
-                    new THREE.MeshLambertMaterial({ color: color })
+                    new THREE.MeshLambertMaterial({ color: colors[type] || 0xCCCCCC })
                 );
                 box.position.y = 0.4;
                 box.castShadow = true;
@@ -825,445 +672,72 @@
                 // Свечение
                 const glow = new THREE.Mesh(
                     new THREE.SphereGeometry(0.5),
-                    new THREE.MeshBasicMaterial({ 
-                        color: color, 
-                        transparent: true, 
-                        opacity: 0.3,
-                        emissive: color
-                    })
+                    new THREE.MeshBasicMaterial({ color: colors[type], transparent: true, opacity: 0.2 })
                 );
                 glow.position.y = 0.4;
                 group.add(glow);
-                
-                // Иконка предмета
-                const canvas = document.createElement('canvas');
-                canvas.width = 32;
-                canvas.height = 32;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = 'white';
-                ctx.font = '24px Arial';
-                ctx.fillText(itemTypes[itemType].emoji, 0, 24);
-                
-                const texture = new THREE.CanvasTexture(canvas);
-                const iconMat = new THREE.SpriteMaterial({ map: texture });
-                const icon = new THREE.Sprite(iconMat);
-                icon.scale.set(0.8, 0.8, 0.8);
-                icon.position.y = 1.2;
-                group.add(icon);
                 
                 group.position.set(x, 0, z);
                 
                 group.userData = {
                     type: 'resource',
-                    itemType: itemType,
-                    count: count,
+                    itemType: type,
                     collected: false
                 };
                 
                 return group;
             }
 
-            // ====================== СОЗДАНИЕ УБЕЖИЩА ======================
-            function createShelter() {
-                const group = new THREE.Group();
-                
-                // Основание
-                const base = new THREE.Mesh(
-                    new THREE.CylinderGeometry(shelterRadius, shelterRadius, 0.5, 32),
-                    new THREE.MeshLambertMaterial({ color: 0x333333 })
-                );
-                base.position.y = 0.25;
-                base.receiveShadow = true;
-                group.add(base);
-                
-                // Стены (баррикады)
-                for (let i = 0; i < 8; i++) {
-                    const angle = (i / 8) * Math.PI * 2;
-                    const x = Math.cos(angle) * shelterRadius;
-                    const z = Math.sin(angle) * shelterRadius;
-                    
-                    const wall = new THREE.Mesh(
-                        new THREE.BoxGeometry(2, 3, 2),
-                        new THREE.MeshLambertMaterial({ color: 0x8B4513 })
-                    );
-                    wall.position.set(x, 1.5, z);
-                    wall.castShadow = true;
-                    wall.receiveShadow = true;
-                    group.add(wall);
-                    
-                    // Фонари
-                    if (i % 2 === 0) {
-                        const light = new THREE.PointLight(0x00ff00, 1, 30);
-                        light.position.set(x, 3, z);
-                        group.add(light);
-                        
-                        const lamp = new THREE.Mesh(
-                            new THREE.SphereGeometry(0.3),
-                            new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-                        );
-                        lamp.position.set(x, 3, z);
-                        group.add(lamp);
-                    }
-                }
-                
-                // Ворота
-                const gate = new THREE.Mesh(
-                    new THREE.BoxGeometry(3, 3, 0.5),
-                    new THREE.MeshLambertMaterial({ color: 0x654321 })
-                );
-                gate.position.set(shelterRadius, 1.5, 0);
-                gate.castShadow = true;
-                group.add(gate);
-                
-                // Маркер безопасной зоны
-                const markerMat = new THREE.MeshBasicMaterial({ 
-                    color: 0x00ff00, 
-                    transparent: true, 
-                    opacity: 0.2,
-                    side: THREE.DoubleSide
-                });
-                const marker = new THREE.Mesh(
-                    new THREE.CylinderGeometry(shelterRadius, shelterRadius, 0.1, 64),
-                    markerMat
-                );
-                marker.position.y = 0.1;
-                marker.rotation.x = 0;
-                group.add(marker);
-                
-                group.position.set(shelterPos.x, 0, shelterPos.z);
-                
-                return group;
-            }
-
-            // ====================== КРОВЬ ======================
-            function createBlood(x, z) {
-                const group = new THREE.Group();
-                
-                const bloodMat = new THREE.MeshPhongMaterial({ 
-                    color: 0xff0000, 
-                    transparent: true, 
-                    opacity: 0.7,
-                    emissive: 0x330000
-                });
-                
-                const blood = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.5 + Math.random() * 0.5, 0.5 + Math.random() * 0.5, 0.05, 8),
-                    bloodMat
-                );
-                blood.position.y = 0.02;
-                blood.rotation.x = 0;
-                blood.rotation.z = Math.random() * Math.PI;
-                group.add(blood);
-                
-                // Несколько капель вокруг
-                for (let i = 0; i < 5; i++) {
-                    const drop = new THREE.Mesh(
-                        new THREE.SphereGeometry(0.1 + Math.random() * 0.1),
-                        bloodMat
-                    );
-                    drop.position.set(
-                        (Math.random() - 0.5) * 0.8,
-                        0.05,
-                        (Math.random() - 0.5) * 0.8
-                    );
-                    group.add(drop);
-                }
-                
-                group.position.set(x, 0, z);
-                return group;
-            }
-
-            // ====================== СПАВН РЕСУРСОВ ======================
-            function spawnResources() {
-                const resourceTypes = ['wood', 'nails', 'bottle', 'gasoline', 'bandage', 'alcohol', 'can'];
-                
-                for (let i = 0; i < 30; i++) {
-                    let x, z;
-                    do {
-                        x = (Math.random() - 0.5) * MAP_SIZE * 2;
-                        z = (Math.random() - 0.5) * MAP_SIZE * 2;
-                    } while (Math.sqrt(x*x + z*z) < shelterRadius + 10); // Не спавнить в убежище
-                    
-                    const type = resourceTypes[Math.floor(Math.random() * resourceTypes.length)];
-                    const resource = createResourceItem(x, z, type, Math.floor(Math.random() * 3) + 1);
-                    scene.add(resource);
-                    resources.push(resource);
-                }
-            }
-
-            // ====================== СПАВН ЗОМБИ ======================
-            function spawnZombieWave() {
-                if (dayTime) return; // Днём не спавним
-                
-                const count = 5 + dayCount * 2; // С каждым днём зомби больше
-                
-                for (let i = 0; i < count; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const dist = 50 + Math.random() * 100;
-                    
-                    const x = shelterPos.x + Math.cos(angle) * dist;
-                    const z = shelterPos.z + Math.sin(angle) * dist;
-                    
-                    // Выбираем случайный тип зомби
-                    const types = ['normal', 'fat', 'fast', 'explosive'];
-                    const type = types[Math.floor(Math.random() * types.length)];
-                    
-                    const zombie = createZombie(x, z, type);
-                    scene.add(zombie);
-                    zombies.push(zombie);
-                }
-                
-                updateZombieCount();
-            }
-
-            // ====================== ДЕНЬ/НОЧЬ ======================
-            function updateDayNight() {
-                timeOfDay += timeSpeed;
-                
-                if (timeOfDay >= 24) {
-                    timeOfDay = 0;
-                    dayCount++;
-                    
-                    // Каждый новый день - новые ресурсы
-                    spawnResources();
-                }
-                
-                // День с 6 до 18
-                const wasDay = dayTime;
-                dayTime = timeOfDay >= 6 && timeOfDay < 18;
-                
-                // Меняем освещение
-                if (scene) {
-                    const sunIntensity = dayTime ? 1.0 : 0.2;
-                    scene.traverse(obj => {
-                        if (obj.isLight && obj.userData && obj.userData.isSun) {
-                            obj.intensity = sunIntensity;
-                        }
-                    });
-                    
-                    // Цвет неба
-                    if (dayTime) {
-                        scene.background.setHex(0x87CEEB);
-                        scene.fog.color.setHex(0x87CEEB);
-                    } else {
-                        scene.background.setHex(0x111122);
-                        scene.fog.color.setHex(0x111122);
-                    }
-                }
-                
-                // Если наступила ночь - спавним волну
-                if (wasDay && !dayTime) {
-                    spawnZombieWave();
-                }
-                
-                // Обновляем UI
-                const timeStr = Math.floor(timeOfDay).toString().padStart(2, '0') + ':' + 
-                               Math.floor((timeOfDay % 1) * 60).toString().padStart(2, '0');
-                document.getElementById('day-night').innerHTML = 
-                    (dayTime ? '☀️' : '🌙') + ` ДЕНЬ ${dayCount} | ${timeStr}`;
-            }
-
-            // ====================== ОБНОВЛЕНИЕ ЗОМБИ ======================
-            function updateZombies() {
-                if (!player) return;
-                
-                const now = Date.now();
-                
-                zombies.forEach((zombie, index) => {
-                    if (!zombie.userData || zombie.userData.health <= 0) return;
-                    
-                    const distToPlayer = player.position.distanceTo(zombie.position);
-                    const distToShelter = Math.sqrt(
-                        (zombie.position.x - shelterPos.x)**2 + 
-                        (zombie.position.z - shelterPos.z)**2
-                    );
-                    
-                    // Если в убежище - зомби не трогают
-                    if (inShelter && distToShelter < shelterRadius) {
-                        // Зомби не заходят в убежище
-                        const angle = Math.atan2(
-                            zombie.position.x - shelterPos.x,
-                            zombie.position.z - shelterPos.z
-                        );
-                        zombie.position.x = shelterPos.x + Math.cos(angle) * shelterRadius;
-                        zombie.position.z = shelterPos.z + Math.sin(angle) * shelterRadius;
-                        return;
-                    }
-                    
-                    // Агрессивность ночью
-                    const aggression = dayTime ? 1 : 1.5;
-                    
-                    if (distToPlayer < 30) {
-                        // Бежим к игроку
-                        const dx = player.position.x - zombie.position.x;
-                        const dz = player.position.z - zombie.position.z;
-                        const dist = Math.sqrt(dx*dx + dz*dz);
-                        
-                        if (dist > 2) {
-                            const angle = Math.atan2(dx, dz);
-                            zombie.rotation.y = angle;
-                            
-                            zombie.position.x += Math.sin(angle) * zombie.userData.speed * aggression;
-                            zombie.position.z += Math.cos(angle) * zombie.userData.speed * aggression;
-                        } else {
-                            // Атакуем
-                            if (now - zombie.userData.attackCooldown > 1000) {
-                                if (!inShelter) {
-                                    hp -= zombie.userData.attackDamage;
-                                    document.getElementById('hp-fill').style.width = hp + '%';
-                                    playSound('hit');
-                                    
-                                    if (hp <= 0) {
-                                        document.getElementById('death-screen').style.display = 'flex';
-                                    }
-                                }
-                                zombie.userData.attackCooldown = now;
-                            }
-                        }
-                    } else {
-                        // Случайное блуждание
-                        if (!zombie.userData.target || 
-                            zombie.position.distanceTo(zombie.userData.target) < 5) {
-                            zombie.userData.target = new THREE.Vector3(
-                                zombie.position.x + (Math.random() - 0.5) * 30,
-                                0,
-                                zombie.position.z + (Math.random() - 0.5) * 30
-                            );
-                        }
-                        
-                        const dx = zombie.userData.target.x - zombie.position.x;
-                        const dz = zombie.userData.target.z - zombie.position.z;
-                        const dist = Math.sqrt(dx*dx + dz*dz);
-                        
-                        if (dist > 1) {
-                            const angle = Math.atan2(dx, dz);
-                            zombie.rotation.y = angle;
-                            zombie.position.x += Math.sin(angle) * zombie.userData.speed * 0.5;
-                            zombie.position.z += Math.cos(angle) * zombie.userData.speed * 0.5;
-                        }
-                    }
-                    
-                    // Проверка выхода за границы
-                    if (Math.abs(zombie.position.x) > MAP_SIZE - 10) {
-                        zombie.position.x = (zombie.position.x > 0 ? MAP_SIZE - 10 : -MAP_SIZE + 10);
-                    }
-                    if (Math.abs(zombie.position.z) > MAP_SIZE - 10) {
-                        zombie.position.z = (zombie.position.z > 0 ? MAP_SIZE - 10 : -MAP_SIZE + 10);
-                    }
-                });
-            }
-
-            // ====================== ОБНОВЛЕНИЕ РЕСУРСОВ ======================
-            function updateResources() {
-                if (!player) return;
-                
-                resources.forEach((resource, index) => {
-                    if (resource.userData.collected) return;
-                    
-                    const dist = player.position.distanceTo(resource.position);
-                    
-                    if (dist < 3) {
-                        // Подбираем ресурс
-                        if (addToInventory(resource.userData.itemType, resource.userData.count)) {
-                            scene.remove(resource);
-                            resources.splice(index, 1);
-                            playSound('pickup');
-                        }
-                    }
-                    
-                    // Анимация вращения
-                    resource.rotation.y += 0.02;
-                });
-            }
-
             // ====================== АТАКА ======================
-            function attack() {
-                if (!player || inShelter) return; // В убежище нельзя атаковать
+            window.attack = function() {
+                if (!player) return;
                 
                 const weapon = inventory[selectedSlot].item;
                 
-                // Проверяем, есть ли оружие
-                if (weapon !== 'bat' && weapon !== 'molotov') {
-                    // Рукопашная (слабая)
-                    attackMelee();
-                    return;
+                // Если нет оружия или это не оружие - бьем кулаками
+                let damage = 10;
+                
+                if (weapon && items[weapon] && items[weapon].damage) {
+                    damage = items[weapon].damage;
+                    
+                    // Если это молотов - особый эффект
+                    if (weapon === 'molotov') {
+                        removeFromInventory('molotov', 1);
+                        throwMolotov();
+                        return;
+                    }
+                    
+                    // Если это аптечка - лечимся
+                    if (weapon === 'medkit') {
+                        hp = Math.min(100, hp + 50);
+                        document.getElementById('hp-fill').style.width = hp + '%';
+                        removeFromInventory('medkit', 1);
+                        return;
+                    }
                 }
                 
-                if (weapon === 'bat') {
-                    attackMelee(30);
-                } else if (weapon === 'molotov') {
-                    throwMolotov();
-                }
-            }
-
-            function attackMelee(damage = 10) {
-                const attackRange = 4;
-                
+                // Ближний бой
                 zombies.forEach((zombie, index) => {
                     const dist = player.position.distanceTo(zombie.position);
-                    
-                    if (dist < attackRange) {
+                    if (dist < 3) {
                         zombie.userData.health -= damage;
                         
                         if (zombie.userData.health <= 0) {
-                            // Зомби умирает
                             scene.remove(zombie);
-                            
-                            // Кровь
-                            const blood = createBlood(zombie.position.x, zombie.position.z);
-                            scene.add(blood);
-                            setTimeout(() => scene.remove(blood), 5000);
-                            
-                            // Взрывоопасный зомби взрывается
-                            if (zombie.userData.explodeOnDeath) {
-                                // Урон по области
-                                zombies.forEach(z => {
-                                    if (z !== zombie && z.position.distanceTo(zombie.position) < 5) {
-                                        z.userData.health -= 30;
-                                    }
-                                });
-                                
-                                // Эффект взрыва
-                                const explosion = new THREE.Mesh(
-                                    new THREE.SphereGeometry(2),
-                                    new THREE.MeshBasicMaterial({ color: 0xff5500, transparent: true, opacity: 0.5 })
-                                );
-                                explosion.position.copy(zombie.position);
-                                scene.add(explosion);
-                                setTimeout(() => scene.remove(explosion), 200);
-                            }
-                            
                             zombies.splice(index, 1);
+                            updateZombieCount();
                             
                             // Шанс выпадения ресурса
                             if (Math.random() < 0.3) {
-                                const resource = createResourceItem(
-                                    zombie.position.x,
-                                    zombie.position.z,
-                                    'can',
-                                    1
-                                );
-                                scene.add(resource);
-                                resources.push(resource);
+                                addToInventory('can', 1);
                             }
-                            
-                            playSound('zombieDeath');
                         }
-                        
-                        playSound('hit');
                     }
                 });
-                
-                updateZombieCount();
-            }
+            };
 
             function throwMolotov() {
-                // Проверяем, есть ли молотов
-                if (inventory[selectedSlot].item !== 'molotov') return;
-                
-                removeFromInventory('molotov', 1);
-                
-                // Создаём огненную зону
+                // Создаем огненное поле
                 const firePos = new THREE.Vector3(
                     player.position.x + Math.sin(player.rotation.y) * 5,
                     0,
@@ -1278,405 +752,177 @@
                 fire.position.y = 0.1;
                 scene.add(fire);
                 
-                // Урон зомби в огне
+                // Урон зомби
                 zombies.forEach(zombie => {
                     if (zombie.position.distanceTo(firePos) < 4) {
                         zombie.userData.health -= 50;
+                        if (zombie.userData.health <= 0) {
+                            scene.remove(zombie);
+                        }
                     }
                 });
                 
-                setTimeout(() => scene.remove(fire), 5000);
-                
-                playSound('explosion');
+                setTimeout(() => scene.remove(fire), 2000);
             }
 
-            // ====================== ОБНОВЛЕНИЕ ГОЛОДА ======================
-            function updateHunger() {
-                hunger -= 0.002; // Медленно падает
+            // ====================== ОБНОВЛЕНИЕ ======================
+            function updateZombies() {
+                if (!player) return;
                 
-                if (hunger <= 0) {
-                    hp -= 0.5;
-                    document.getElementById('hp-fill').style.width = hp + '%';
-                    hunger = 0;
-                    
-                    if (hp <= 0) {
-                        document.getElementById('death-screen').style.display = 'flex';
+                // Спавн зомби ночью
+                if (!dayTime && zombies.length < 10 + dayCount * 3) {
+                    if (Math.random() < 0.01) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const dist = 40 + Math.random() * 50;
+                        const x = player.position.x + Math.cos(angle) * dist;
+                        const z = player.position.z + Math.sin(angle) * dist;
+                        
+                        const zombie = createZombie(x, z);
+                        scene.add(zombie);
+                        zombies.push(zombie);
+                        updateZombieCount();
                     }
                 }
                 
-                // Можно съесть консервы
-                if (hunger < 50 && inventory.some(slot => slot.item === 'can')) {
-                    // Автоматически едим, если голодны
+                // Зомби горят на солнце ☀️
+                if (dayTime) {
+                    zombies.forEach(zombie => {
+                        zombie.userData.health -= 0.05; // Медленно горят
+                        if (zombie.userData.health <= 0) {
+                            scene.remove(zombie);
+                        }
+                    });
+                    // Фильтруем мертвых
+                    zombies = zombies.filter(z => scene.children.includes(z));
+                    updateZombieCount();
+                }
+                
+                // Движение зомби к игроку
+                zombies.forEach(zombie => {
+                    if (!zombie.parent) return;
+                    
+                    const dist = player.position.distanceTo(zombie.position);
+                    
+                    if (dist < 20) {
+                        const dx = player.position.x - zombie.position.x;
+                        const dz = player.position.z - zombie.position.z;
+                        const angle = Math.atan2(dx, dz);
+                        
+                        zombie.rotation.y = angle;
+                        zombie.position.x += Math.sin(angle) * zombie.userData.speed;
+                        zombie.position.z += Math.cos(angle) * zombie.userData.speed;
+                        
+                        // Атака
+                        if (dist < 2) {
+                            const now = Date.now();
+                            if (now - zombie.userData.attackCooldown > 1000) {
+                                hp -= zombie.userData.attackDamage;
+                                document.getElementById('hp-fill').style.width = hp + '%';
+                                zombie.userData.attackCooldown = now;
+                                
+                                if (hp <= 0) {
+                                    document.getElementById('death-screen').style.display = 'flex';
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateResources() {
+                if (!player) return;
+                
+                resources.forEach((resource, index) => {
+                    if (resource.userData.collected) return;
+                    
+                    const dist = player.position.distanceTo(resource.position);
+                    
+                    if (dist < 2) {
+                        addToInventory(resource.userData.itemType, 1);
+                        scene.remove(resource);
+                        resources.splice(index, 1);
+                    }
+                });
+            }
+
+            function checkCollisions() {
+                if (!player) return false;
+                
+                // Проверка стен базы
+                for (let wall of baseWalls) {
+                    if (!wall.userData?.collider) continue;
+                    
+                    const collider = wall.userData.collider;
+                    const halfW = collider.width / 2;
+                    const halfL = collider.length / 2;
+                    
+                    if (player.position.x + 1 > collider.x - halfW &&
+                        player.position.x - 1 < collider.x + halfW &&
+                        player.position.z + 1 > collider.z - halfL &&
+                        player.position.z - 1 < collider.z + halfL) {
+                        return true;
+                    }
+                }
+                
+                // Границы карты
+                if (Math.abs(player.position.x) > MAP_SIZE - 10 ||
+                    Math.abs(player.position.z) > MAP_SIZE - 10) {
+                    return true;
+                }
+                
+                return false;
+            }
+
+            function updateDayNight() {
+                timeOfDay += 0.002;
+                
+                if (timeOfDay >= 24) {
+                    timeOfDay = 0;
+                    dayCount++;
+                }
+                
+                dayTime = timeOfDay >= 6 && timeOfDay < 20;
+                
+                const timeStr = Math.floor(timeOfDay) + ':' + 
+                               Math.floor((timeOfDay % 1) * 60).toString().padStart(2, '0');
+                document.getElementById('day-night').innerHTML = 
+                    (dayTime ? '☀️' : '🌙') + ` ДЕНЬ ${dayCount} | ${timeStr}`;
+                
+                // Меняем освещение
+                if (scene) {
+                    scene.background.setHex(dayTime ? 0x87CEEB : 0x111122);
+                }
+            }
+
+            function updateHunger() {
+                hunger -= 0.002;
+                
+                if (hunger <= 0) {
+                    hp -= 0.1;
+                    document.getElementById('hp-fill').style.width = hp + '%';
+                    hunger = 0;
+                }
+                
+                // Автоматически едим, если есть консервы
+                if (hunger < 30) {
                     for (let i = 0; i < 8; i++) {
                         if (inventory[i].item === 'can') {
                             inventory[i].count--;
                             if (inventory[i].count <= 0) {
                                 inventory[i].item = null;
-                                inventory[i].count = 0;
                             }
                             hunger = Math.min(100, hunger + 30);
-                            hp = Math.min(100, hp + 10);
-                            document.getElementById('hp-fill').style.width = hp + '%';
                             initInventory();
-                            playSound('eat');
                             break;
                         }
                     }
                 }
                 
-                document.getElementById('hunger').innerHTML = `🍞 ГОЛОД: ${Math.floor(hunger)}%`;
+                document.getElementById('hunger-fill').style.width = hunger + '%';
             }
 
-            // ====================== УБЕЖИЩЕ ======================
-            function updateShelter() {
-                if (!player) return;
-                
-                const distToShelter = Math.sqrt(
-                    (player.position.x - shelterPos.x)**2 + 
-                    (player.position.z - shelterPos.z)**2
-                );
-                
-                inShelter = distToShelter < shelterRadius;
-                
-                document.getElementById('shelter-status').innerHTML = 
-                    inShelter ? '🏠 В УБЕЖИЩЕ: ДА' : '🏠 В УБЕЖИЩЕ: НЕТ';
-                
-                if (inShelter && !dayTime) {
-                    // В убежище ночью можно лечиться
-                    hp = Math.min(100, hp + 0.01);
-                    document.getElementById('hp-fill').style.width = hp + '%';
-                }
-            }
-
-            // ====================== МУЛЬТИПЛЕЕР ======================
-            function initMultiplayer() {
-                peer = new Peer();
-                peer.on('open', (id) => {
-                    document.getElementById('my-id').innerText = id.substring(0,6);
-                });
-                
-                peer.on('connection', (connection) => {
-                    conn = connection;
-                    conn.on('data', (data) => {
-                        handleNetworkData(data);
-                    });
-                });
-            }
-
-            window.connectToPeer = function() {
-                const peerId = document.getElementById('peer-id').value;
-                if (peerId) {
-                    conn = peer.connect(peerId);
-                    conn.on('open', () => {
-                        console.log('Connected!');
-                    });
-                    conn.on('data', (data) => {
-                        handleNetworkData(data);
-                    });
-                }
-            };
-
-            function handleNetworkData(data) {
-                if (data.type === 'pos') {
-                    // Обновляем позицию другого игрока
-                    if (!otherPlayers.has(data.id)) {
-                        // Создаём нового игрока
-                        const otherPlayer = createHuman(0xff0000, false);
-                        scene.add(otherPlayer);
-                        otherPlayers.set(data.id, otherPlayer);
-                    }
-                    
-                    const other = otherPlayers.get(data.id);
-                    other.position.x = data.x;
-                    other.position.z = data.z;
-                    other.rotation.y = data.rot;
-                }
-                
-                if (data.type === 'attack') {
-                    playSound('shoot');
-                }
-            }
-
-            window.toggleMPMenu = function() {
-                const menu = document.getElementById('mp-menu');
-                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-            };
-
-            // ====================== ЗВУКИ ======================
-            function playSound(type) {
-                if (!soundEnabled) return;
-                
-                try {
-                    const now = audioCtx.currentTime;
-                    
-                    if (type === 'hit') {
-                        const osc = audioCtx.createOscillator();
-                        osc.frequency.value = 200;
-                        const gain = audioCtx.createGain();
-                        gain.gain.setValueAtTime(0.2, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        osc.start();
-                        osc.stop(now + 0.1);
-                    }
-                    
-                    if (type === 'zombieDeath') {
-                        const osc = audioCtx.createOscillator();
-                        osc.frequency.setValueAtTime(100, now);
-                        osc.frequency.exponentialRampToValueAtTime(30, now + 0.3);
-                        const gain = audioCtx.createGain();
-                        gain.gain.setValueAtTime(0.3, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        osc.start();
-                        osc.stop(now + 0.3);
-                    }
-                    
-                    if (type === 'pickup') {
-                        const osc = audioCtx.createOscillator();
-                        osc.frequency.setValueAtTime(400, now);
-                        osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
-                        const gain = audioCtx.createGain();
-                        gain.gain.setValueAtTime(0.1, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        osc.start();
-                        osc.stop(now + 0.1);
-                    }
-                    
-                    if (type === 'craft') {
-                        const osc = audioCtx.createOscillator();
-                        osc.frequency.setValueAtTime(300, now);
-                        osc.frequency.exponentialRampToValueAtTime(600, now + 0.2);
-                        const gain = audioCtx.createGain();
-                        gain.gain.setValueAtTime(0.1, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        osc.start();
-                        osc.stop(now + 0.2);
-                    }
-                    
-                    if (type === 'explosion') {
-                        const noise = audioCtx.createBufferSource();
-                        const buffer = audioCtx.createBuffer(1, 4096, audioCtx.sampleRate);
-                        const data = buffer.getChannelData(0);
-                        for (let i = 0; i < 4096; i++) data[i] = Math.random() * 2 - 1;
-                        noise.buffer = buffer;
-                        
-                        const gain = audioCtx.createGain();
-                        gain.gain.setValueAtTime(0.3, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-                        
-                        noise.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        noise.start();
-                        noise.stop(now + 0.5);
-                    }
-                    
-                    if (type === 'eat') {
-                        const osc = audioCtx.createOscillator();
-                        osc.frequency.setValueAtTime(200, now);
-                        osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
-                        const gain = audioCtx.createGain();
-                        gain.gain.setValueAtTime(0.1, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        osc.start();
-                        osc.stop(now + 0.1);
-                    }
-                } catch (e) {}
-            }
-
-            // ====================== СОЗДАНИЕ МИРА ======================
-            function createGameWorld() {
-                scene = new THREE.Scene();
-                scene.background = new THREE.Color(0x87CEEB);
-                scene.fog = new THREE.FogExp2(0x87CEEB, 0.0015);
-                
-                // Освещение
-                const sunLight = new THREE.DirectionalLight(0xffffff, 1.0);
-                sunLight.position.set(50, 100, 50);
-                sunLight.castShadow = true;
-                sunLight.userData = { isSun: true };
-                scene.add(sunLight);
-                
-                const ambientLight = new THREE.AmbientLight(0x404060);
-                scene.add(ambientLight);
-                
-                // Земля
-                const groundGeo = new THREE.PlaneGeometry(600, 600);
-                const groundMat = new THREE.MeshLambertMaterial({ color: 0x2a5a2a });
-                const ground = new THREE.Mesh(groundGeo, groundMat);
-                ground.rotation.x = -Math.PI/2;
-                ground.position.y = -0.1;
-                ground.receiveShadow = true;
-                scene.add(ground);
-                
-                // Дороги (упрощённо)
-                const roadMat = new THREE.MeshLambertMaterial({ color: 0x333333 });
-                for (let i = -200; i <= 200; i += 100) {
-                    const roadH = new THREE.Mesh(
-                        new THREE.BoxGeometry(600, 0.2, 14),
-                        roadMat
-                    );
-                    roadH.position.set(0, 0, i);
-                    roadH.receiveShadow = true;
-                    scene.add(roadH);
-                    
-                    const roadV = new THREE.Mesh(
-                        new THREE.BoxGeometry(14, 0.2, 600),
-                        roadMat
-                    );
-                    roadV.position.set(i, 0, 0);
-                    roadV.receiveShadow = true;
-                    scene.add(roadV);
-                }
-                
-                // Здания (руины)
-                for (let i = 0; i < 30; i++) {
-                    let x, z;
-                    do {
-                        x = (Math.random() - 0.5) * 500;
-                        z = (Math.random() - 0.5) * 500;
-                    } while (Math.sqrt(x*x + z*z) < shelterRadius + 30);
-                    
-                    const building = createRuinedBuilding(x, z);
-                    scene.add(building);
-                    buildings.push(building);
-                }
-                
-                // Убежище
-                shelter = createShelter();
-                scene.add(shelter);
-                
-                // Игрок
-                player = createHuman(0x0055ff, true);
-                player.position.set(shelterPos.x + 5, 0, shelterPos.z + 5);
-                scene.add(player);
-                
-                // Ресурсы
-                spawnResources();
-                
-                // Камера
-                camera.position.set(shelterPos.x, 10, shelterPos.z + 20);
-                camera.lookAt(shelterPos.x, 1, shelterPos.z);
-                
-                targetCameraRot = 0;
-                cameraRot = 0;
-            }
-
-            function createRuinedBuilding(x, z) {
-                const group = new THREE.Group();
-                
-                const height = 5 + Math.random() * 10;
-                const color = 0x666666;
-                
-                // Разрушенное здание
-                const main = new THREE.Mesh(
-                    new THREE.BoxGeometry(10, height, 10),
-                    new THREE.MeshLambertMaterial({ color: color })
-                );
-                main.position.y = height/2;
-                main.castShadow = true;
-                main.receiveShadow = true;
-                group.add(main);
-                
-                // Обломки вокруг
-                for (let i = 0; i < 5; i++) {
-                    const debris = new THREE.Mesh(
-                        new THREE.BoxGeometry(1 + Math.random() * 2, 0.5 + Math.random() * 1, 1 + Math.random() * 2),
-                        new THREE.MeshLambertMaterial({ color: 0x888888 })
-                    );
-                    debris.position.set(
-                        (Math.random() - 0.5) * 6,
-                        0.25,
-                        (Math.random() - 0.5) * 6
-                    );
-                    debris.castShadow = true;
-                    debris.receiveShadow = true;
-                    group.add(debris);
-                }
-                
-                group.position.set(x, 0, z);
-                
-                group.userData = {
-                    collider: { x, z, width: 12, length: 12, height: height }
-                };
-                
-                return group;
-            }
-
-            function createHuman(color, isPlayer = false) {
-                const group = new THREE.Group();
-                
-                // Тело
-                const body = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.4, 0.4, 1.8),
-                    new THREE.MeshLambertMaterial({ color: color })
-                );
-                body.position.y = 0.9;
-                body.castShadow = true;
-                group.add(body);
-                
-                // Голова
-                const head = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.3),
-                    new THREE.MeshLambertMaterial({ color: 0xffcc99 })
-                );
-                head.position.y = 1.9;
-                head.castShadow = true;
-                group.add(head);
-                
-                // Глаза
-                const eyeGeo = new THREE.SphereGeometry(0.05);
-                const eyeMat = new THREE.MeshLambertMaterial({ color: 0x000000 });
-                
-                const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-                leftEye.position.set(-0.15, 2.0, 0.25);
-                group.add(leftEye);
-                
-                const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
-                rightEye.position.set(0.15, 2.0, 0.25);
-                group.add(rightEye);
-                
-                // Руки
-                const armGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.8);
-                const armMat = new THREE.MeshLambertMaterial({ color: color });
-                
-                const leftArm = new THREE.Mesh(armGeo, armMat);
-                leftArm.position.set(-0.6, 1.2, 0);
-                leftArm.rotation.z = 0.2;
-                leftArm.rotation.x = 0.2;
-                leftArm.castShadow = true;
-                group.add(leftArm);
-                
-                const rightArm = new THREE.Mesh(armGeo, armMat);
-                rightArm.position.set(0.6, 1.2, 0);
-                rightArm.rotation.z = -0.2;
-                rightArm.rotation.x = -0.2;
-                rightArm.castShadow = true;
-                group.add(rightArm);
-                
-                // Ноги
-                const legGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.8);
-                const legMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
-                
-                const leftLeg = new THREE.Mesh(legGeo, legMat);
-                leftLeg.position.set(-0.2, 0.4, 0);
-                leftLeg.castShadow = true;
-                group.add(leftLeg);
-                
-                const rightLeg = new THREE.Mesh(legGeo, legMat);
-                rightLeg.position.set(0.2, 0.4, 0);
-                rightLeg.castShadow = true;
-                group.add(rightLeg);
-                
-                return group;
+            function updateZombieCount() {
+                document.getElementById('zombie-count').innerHTML = '🧟 ' + zombies.length;
             }
 
             // ====================== ЗАПУСК ======================
@@ -1686,50 +932,11 @@
                 
                 renderer = new THREE.WebGLRenderer({ antialias: true });
                 renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setPixelRatio(window.devicePixelRatio);
                 renderer.shadowMap.enabled = true;
                 document.getElementById('game').appendChild(renderer.domElement);
                 
-                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                
-                window.addEventListener('resize', () => {
-                    if (camera && renderer) {
-                        camera.aspect = window.innerWidth / window.innerHeight;
-                        camera.updateProjectionMatrix();
-                        renderer.setSize(window.innerWidth, window.innerHeight);
-                    }
-                });
-                
-                document.body.addEventListener('touchstart', () => {
-                    audioCtx.resume();
-                }, { once: true });
-                
-                initMultiplayer();
                 createGameWorld();
                 initInventory();
-                
-                const touchArea = document.getElementById('camera-touch-area');
-                let isTouching = false;
-                let touchStartX = 0;
-                
-                touchArea.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    isTouching = true;
-                    touchStartX = e.touches[0].clientX;
-                });
-                
-                touchArea.addEventListener('touchmove', (e) => {
-                    e.preventDefault();
-                    if (!isTouching) return;
-                    
-                    const deltaX = (e.touches[0].clientX - touchStartX) * 0.01;
-                    targetCameraRot += deltaX;
-                    touchStartX = e.touches[0].clientX;
-                });
-                
-                touchArea.addEventListener('touchend', () => {
-                    isTouching = false;
-                });
                 
                 // Управление
                 document.getElementById('left-btn').ontouchstart = (e) => { e.preventDefault(); keys.left = 1; };
@@ -1747,118 +954,46 @@
                 document.getElementById('fire-btn').ontouchstart = (e) => { 
                     e.preventDefault(); 
                     attack();
-                    
-                    // Отправляем атаку в мультиплеер
-                    if (conn) {
-                        conn.send({ type: 'attack' });
-                    }
-                };
-                
-                document.getElementById('action-btn').ontouchstart = (e) => {
-                    e.preventDefault();
-                    // Взаимодействие (подбор ресурсов уже автоматический)
                 };
                 
                 function animate() {
                     requestAnimationFrame(animate);
                     
-                    if (!camera || !renderer || !player) return;
+                    if (!player) return;
                     
-                    // Обновление времени суток
                     updateDayNight();
-                    
-                    // Обновление голода
                     updateHunger();
-                    
-                    // Обновление убежища
-                    updateShelter();
-                    
-                    // Обновление зомби
                     updateZombies();
-                    
-                    // Обновление ресурсов
                     updateResources();
                     
-                    // Движение игрока
-                    const active = player;
+                    // Движение
+                    if (keys.left) player.rotation.y += 0.05;
+                    if (keys.right) player.rotation.y -= 0.05;
                     
-                    if (keys.left) {
-                        active.rotation.y += 0.05;
-                    }
-                    if (keys.right) {
-                        active.rotation.y -= 0.05;
-                    }
+                    if (keys.g) speed += 0.05;
+                    else if (keys.b) speed -= 0.03;
+                    else speed *= 0.9;
                     
-                    if (keys.g) {
-                        speed += 0.07;
-                    } else if (keys.b) {
-                        speed -= 0.05;
-                    } else {
-                        speed *= 0.92;
-                    }
+                    speed = Math.max(-0.3, Math.min(0.5, speed));
                     
-                    const maxSpeed = 0.4;
-                    if (speed < 0) {
-                        speed = Math.max(speed, -maxSpeed * 0.4);
-                    } else {
-                        speed = Math.min(speed, maxSpeed);
-                    }
+                    const prevX = player.position.x;
+                    const prevZ = player.position.z;
                     
-                    const prevX = active.position.x;
-                    const prevZ = active.position.z;
+                    player.position.x += Math.sin(player.rotation.y) * speed;
+                    player.position.z += Math.cos(player.rotation.y) * speed;
                     
-                    active.position.x += Math.sin(active.rotation.y) * speed;
-                    active.position.z += Math.cos(active.rotation.y) * speed;
-                    
-                    // Проверка коллизий со зданиями
-                    let collision = false;
-                    buildings.forEach(building => {
-                        const collider = building.userData.collider;
-                        const halfW = collider.width / 2;
-                        const halfL = collider.length / 2;
-                        
-                        if (active.position.x + 1 > collider.x - halfW &&
-                            active.position.x - 1 < collider.x + halfW &&
-                            active.position.z + 1 > collider.z - halfL &&
-                            active.position.z - 1 < collider.z + halfL) {
-                            collision = true;
-                        }
-                    });
-                    
-                    if (collision) {
-                        active.position.x = prevX;
-                        active.position.z = prevZ;
+                    // Проверка коллизий
+                    if (checkCollisions()) {
+                        player.position.x = prevX;
+                        player.position.z = prevZ;
                         speed = 0;
                     }
                     
-                    // Границы карты
-                    if (Math.abs(active.position.x) > MAP_SIZE - 10) {
-                        active.position.x = prevX;
-                    }
-                    if (Math.abs(active.position.z) > MAP_SIZE - 10) {
-                        active.position.z = prevZ;
-                    }
-                    
-                    // Плавный поворот камеры
-                    let diff = targetCameraRot - cameraRot;
-                    diff = ((diff + Math.PI) % (Math.PI * 2)) - Math.PI;
-                    cameraRot += diff * 0.05;
-                    
                     // Камера
-                    camera.position.x = active.position.x - Math.sin(cameraRot) * 15;
-                    camera.position.y = active.position.y + 5;
-                    camera.position.z = active.position.z - Math.cos(cameraRot) * 15;
-                    camera.lookAt(active.position.x, active.position.y + 1, active.position.z);
-                    
-                    // Отправка позиции в мультиплеер
-                    if (conn) {
-                        conn.send({
-                            type: 'pos',
-                            x: player.position.x,
-                            z: player.position.z,
-                            rot: player.rotation.y
-                        });
-                    }
+                    camera.position.x = player.position.x - Math.sin(cameraRot) * 15;
+                    camera.position.y = player.position.y + 8;
+                    camera.position.z = player.position.z - Math.cos(cameraRot) * 15;
+                    camera.lookAt(player.position.x, player.position.y + 1, player.position.z);
                     
                     renderer.render(scene, camera);
                 }
@@ -1866,39 +1001,19 @@
                 animate();
             };
 
-            function updateZombieCount() {
-                document.getElementById('zombie-count').innerHTML = `🧟 ЗОМБИ: ${zombies.length}`;
-            }
-
             window.restartGame = function() {
                 document.getElementById('death-screen').style.display = 'none';
                 
-                // Очистка сцены
-                while (scene.children.length > 0) {
-                    scene.remove(scene.children[0]);
-                }
+                while(scene.children.length > 0) scene.remove(scene.children[0]);
                 
-                // Сброс переменных
                 hp = 100;
                 hunger = 100;
                 dayCount = 1;
-                timeOfDay = 10;
+                timeOfDay = 12;
                 zombies = [];
                 resources = [];
-                buildings = [];
-                inventory = [
-                    { item: null, count: 0 },
-                    { item: null, count: 0 },
-                    { item: null, count: 0 },
-                    { item: null, count: 0 },
-                    { item: null, count: 0 },
-                    { item: null, count: 0 },
-                    { item: null, count: 0 },
-                    { item: null, count: 0 }
-                ];
-                selectedSlot = 0;
-                
-                document.getElementById('hp-fill').style.width = '100%';
+                baseWalls = [];
+                inventory = new Array(8).fill(null).map(() => ({ item: null, count: 0 }));
                 
                 createGameWorld();
                 initInventory();
@@ -1908,4 +1023,4 @@
         })();
     </script>
 </body>
-  </html>
+                    </html>
