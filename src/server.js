@@ -7,12 +7,14 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+// ✅ ПРАВИЛЬНЫЙ ПУТЬ К ПАПКЕ public
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// МУЛЬТИПЛЕЕР
 const players = new Map();
 
 wss.on('connection', (ws) => {
@@ -37,14 +39,17 @@ wss.on('connection', (ws) => {
         broadcast({ type: 'player_left', id });
     });
     
+    // Отправляем новому игроку всех остальных
     players.forEach((player, pid) => {
-        ws.send(JSON.stringify({
-            type: 'player_join',
-            id: pid,
-            x: player.x,
-            z: player.z,
-            rot: player.rot
-        }));
+        if(pid !== id) {
+            ws.send(JSON.stringify({
+                type: 'player_join',
+                id: pid,
+                x: player.x,
+                z: player.z,
+                rot: player.rot
+            }));
+        }
     });
 });
 
@@ -56,4 +61,8 @@ function broadcast(msg, exclude) {
     });
 }
 
-server.listen(process.env.PORT || 10000);
+const PORT = process.env.PORT || 10000;
+server.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`📁 Serving files from: ${path.join(__dirname, 'public')}`);
+});
